@@ -422,6 +422,23 @@ footer p {
     .project-card {
         padding: 1.5rem;
     }
+
+    .about-content {
+        flex-direction: column;
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .profile-photo {
+        width: 250px;
+        height: 250px;
+        margin: 0 auto;
+    }
+
+    .experience-text h3 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
 }
 
 /* Smooth scrolling */
