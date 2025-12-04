@@ -156,14 +156,29 @@ section h2 {
     border: 1px solid var(--border-color);
     margin-top: 1rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    display: block;
+    visibility: visible;
+    opacity: 1;
 }
 
 .about .bio-text p {
     font-size: 1.1rem;
     line-height: 1.9;
-    color: var(--text-color);
+    color: var(--text-color) !important;
     text-align: left;
     margin-bottom: 1.5rem;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+}
+
+.about .bio-text .intro-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-color) !important;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .about .bio-text p:last-child {
@@ -171,7 +186,7 @@ section h2 {
 }
 
 .about .highlight {
-    color: var(--primary-color);
+    color: var(--primary-color) !important;
     font-weight: 600;
 }
 
