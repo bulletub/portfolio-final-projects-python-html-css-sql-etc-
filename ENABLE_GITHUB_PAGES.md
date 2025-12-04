@@ -1,16 +1,25 @@
-# Enable GitHub Pages - Quick Guide
+# Enable GitHub Pages - Step-by-Step Guide
 
-Follow these steps to enable GitHub Pages so your portfolio and projects are visible online.
+**IMPORTANT:** You MUST enable GitHub Pages in your repository settings for the site to work!
 
-## Step 1: Enable GitHub Pages
+## Step 1: Enable GitHub Pages (REQUIRED)
 
-1. Go to your repository: https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-
-2. Click on **Settings** (top menu bar)
-3. Scroll down to **Pages** in the left sidebar
-4. Under **Source**, select:
-   - **Branch**: `main`
-   - **Folder**: `/ (root)`
-5. Click **Save**
+1. **Go to your repository Settings:**
+   - Direct link: https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-/settings/pages
+   - Or: Go to your repo → Click **Settings** (top menu) → Click **Pages** (left sidebar)
+
+2. **Configure GitHub Pages:**
+   - Under **"Source"** section:
+     - **Branch**: Select `main` from the dropdown
+     - **Folder**: Select `/ (root)` from the dropdown
+   - Click **Save** button
+
+3. **Wait for confirmation:**
+   - You should see a message: "Your site is published at https://bulletub.github.io/portfolio-final-projects-python-html-css-sql-etc-/"
+   - If you see an error, make sure:
+     - The repository is **Public** (not Private)
+     - You're on the `main` branch (not `master`)
+     - All files are pushed to GitHub
 
 ## Step 2: Wait for Deployment
 
