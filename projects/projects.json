@@ -1,0 +1,12 @@
+{
+  "projects": [
+    {
+      "title": "Example Project",
+      "description": "This is an example project. Replace this with your actual projects.",
+      "technologies": ["HTML", "CSS", "JavaScript"],
+      "githubUrl": "https://github.com/yourusername/example-project",
+      "liveUrl": "https://example-project.com"
+    }
+  ]
+}
+
