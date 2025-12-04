@@ -3,4 +3,5 @@ requests>=2.28.0
 matplotlib>=3.7.0
 Werkzeug>=2.3.0
 numpy
+gunicorn
 

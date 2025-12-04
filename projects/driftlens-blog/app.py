@@ -10,8 +10,17 @@ from datetime import datetime
 import pytz
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'supersecretkey'  # Change in production
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///driftlens.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecretkey')  # Use env var in production
+
+# Use PostgreSQL on Render, SQLite locally
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # Render provides DATABASE_URL, but SQLAlchemy needs postgresql:// not postgres://
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///driftlens.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -1655,4 +1664,5 @@ def forbidden_error(error):
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)

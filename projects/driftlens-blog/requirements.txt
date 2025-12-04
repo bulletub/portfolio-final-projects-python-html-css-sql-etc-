@@ -7,3 +7,5 @@ flask-wtf
 python-dotenv
 werkzeug
 pytz
+gunicorn
+psycopg2-binary
