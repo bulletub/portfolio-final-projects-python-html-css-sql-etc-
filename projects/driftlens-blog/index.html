@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftLens Blog - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #f5576c;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        .features {
+            margin: 30px 0;
+        }
+        .features h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .features li:before {
+            content: "📝 ";
+            margin-right: 10px;
+        }
+        .tech-stack {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .tech-stack h3 {
+            color: #f5576c;
+            margin-bottom: 10px;
+        }
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tech-tag {
+            background: #f5576c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .demo-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: #f5576c;
+            color: white;
+        }
+        .btn-secondary {
+            background: #f093fb;
+            color: white;
+        }
+        .info-box {
+            background: #ffe0e6;
+            border-left: 4px solid #f5576c;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 DriftLens Blog</h1>
+        <p class="subtitle">Social Blogging Platform</p>
+        
+        <div class="info-box">
+            <strong>📝 Note:</strong> This is a Flask application that requires a backend server and database. 
+            To see the live demo, please deploy it to Render, Railway, or another cloud platform. 
+            See the README.md for deployment instructions.
+        </div>
+
+        <div class="features">
+            <h2>✨ Features</h2>
+            <ul>
+                <li>User authentication and registration</li>
+                <li>Create and edit blog posts</li>
+                <li>Comments and likes system</li>
+                <li>Private messaging between users</li>
+                <li>Groups and group management</li>
+                <li>Real-time notifications</li>
+                <li>User profiles and activity feeds</li>
+                <li>Search functionality</li>
+                <li>Admin dashboard with analytics</li>
+                <li>Content moderation and reporting</li>
+                <li>Mobile responsive design</li>
+                <li>Splash screen and animations</li>
+            </ul>
+        </div>
+
+        <div class="tech-stack">
+            <h3>🛠️ Technologies Used</h3>
+            <div class="tech-tags">
+                <span class="tech-tag">Python 3</span>
+                <span class="tech-tag">Flask</span>
+                <span class="tech-tag">SQLAlchemy</span>
+                <span class="tech-tag">Flask-Login</span>
+                <span class="tech-tag">Flask-Bcrypt</span>
+                <span class="tech-tag">SQLite/PostgreSQL</span>
+                <span class="tech-tag">HTML5</span>
+                <span class="tech-tag">CSS3</span>
+                <span class="tech-tag">JavaScript</span>
+            </div>
+        </div>
+
+        <div class="demo-buttons">
+            <a href="https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-/tree/main/projects/driftlens-blog" class="btn btn-primary" target="_blank">
+                📂 View Source Code
+            </a>
+            <a href="../driftlens-blog/README.md" class="btn btn-secondary" target="_blank">
+                📖 Read Documentation
+            </a>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 0.9em;">
+                <strong>⏱️ Development Time:</strong> Part of a 4-month portfolio development period<br>
+                <strong>📅 Status:</strong> Ready for deployment to cloud platforms
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

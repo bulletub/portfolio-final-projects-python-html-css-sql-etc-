@@ -13,7 +13,7 @@
       "description": "A comprehensive real-time weather analysis dashboard with interactive maps, live weather updates, advanced analytics, and data export capabilities. Features trend analysis, distribution charts, and automatic weather alerts.",
       "technologies": ["Python", "Flask", "Open-Meteo API", "Leaflet.js", "Matplotlib", "HTML5", "CSS3", "JavaScript"],
       "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
-      "liveUrl": "https://weather-analyzer.onrender.com",
+      "liveUrl": "projects/weather-analyzer/index.html",
       "category": "Web Application"
     },
     {
@@ -21,7 +21,7 @@
       "description": "A full-featured social blogging platform with user authentication, post creation, comments, likes, messaging, groups, notifications, and admin dashboard. Includes guest browsing, search functionality, and mobile-responsive design.",
       "technologies": ["Python", "Flask", "SQLAlchemy", "SQLite", "Flask-Login", "Bcrypt", "HTML5", "CSS3", "JavaScript"],
       "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
-      "liveUrl": "https://driftlens-blog.onrender.com",
+      "liveUrl": "projects/driftlens-blog/index.html",
       "category": "Web Application"
     }
   ]
