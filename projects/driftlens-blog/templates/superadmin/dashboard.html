@@ -1,0 +1,62 @@
+{% extends "superadmin/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-gray-500">Total Users</p>
+            <p class="text-3xl font-bold text-gray-800">{{ total_users }}</p>
+        </div>
+        <div class="bg-blue-100 p-3 rounded-full">
+            <i data-feather="users" class="text-blue-600"></i>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-gray-500">Total Posts</p>
+            <p class="text-3xl font-bold text-gray-800">{{ total_posts }}</p>
+        </div>
+        <div class="bg-green-100 p-3 rounded-full">
+            <i data-feather="file-text" class="text-green-600"></i>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-gray-500">Top Category</p>
+            <p class="text-3xl font-bold text-gray-800 capitalize">{{ top_category }}</p>
+        </div>
+        <div class="bg-indigo-100 p-3 rounded-full">
+            <i data-feather="tag" class="text-indigo-600"></i>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">Top 5 Most Viewed Posts</h3>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="p-3 font-medium">Title</th>
+                    <th class="p-3 font-medium">Author</th>
+                    <th class="p-3 font-medium">Category</th>
+                    <th class="p-3 font-medium">Views</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in most_viewed_posts %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">{{ post.title }}</td>
+                    <td class="p-3">{{ post.user.email }}</td>
+                    <td class="p-3 capitalize">{{ post.category }}</td>
+                    <td class="p-3 font-bold">{{ post.views }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

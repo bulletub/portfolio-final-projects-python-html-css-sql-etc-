@@ -1,0 +1,2570 @@
+================================================================================
+                    DRIFTLENS BLOG PLATFORM
+            COMPLETE MODULE & FUNCTIONALITY DOCUMENTATION
+================================================================================
+
+TABLE OF CONTENTS:
+==================
+1. IMPORTS & DEPENDENCIES
+2. CONFIGURATION & INITIALIZATION
+3. DATABASE MODELS (15 Models)
+4. HELPER FUNCTIONS & DECORATORS
+5. USER SIDE MODULES (28 Routes)
+6. SUPERADMIN SIDE MODULES (10 Routes)
+7. API ENDPOINTS (12 Routes)
+8. SECURITY & AUTHENTICATION
+9. FILE HANDLING
+10. DATABASE RELATIONSHIPS
+
+================================================================================
+1. IMPORTS & DEPENDENCIES
+================================================================================
+
+FLASK CORE:
+-----------
+- Flask: Main web framework
+- render_template: Renders HTML templates with Jinja2
+- request: Handles HTTP requests (GET, POST, etc.)
+- redirect: Redirects users to different routes
+- url_for: Generates URLs for routes dynamically
+- flash: Displays one-time messages to users
+- session: Stores temporary user data (server-side)
+- jsonify: Converts Python dicts to JSON responses
+- send_from_directory: Serves static files securely
+
+FLASK EXTENSIONS:
+-----------------
+- flask_sqlalchemy (SQLAlchemy): ORM for database operations
+  * Provides db object for queries
+  * Handles database connections
+  * Manages transactions
+
+- flask_bcrypt (Bcrypt): Password hashing
+  * bcrypt.generate_password_hash(): Creates secure password hashes
+  * bcrypt.check_password_hash(): Verifies passwords
+  * Uses salt rounds for security
+  * One-way encryption (cannot be decrypted)
+
+- flask_login (LoginManager, UserMixin): User session management
+  * LoginManager: Manages user sessions
+  * UserMixin: Adds required methods to User model
+  * login_user(): Logs user in
+  * logout_user(): Logs user out
+  * login_required: Decorator to protect routes
+  * current_user: Access logged-in user data
+
+WERKZEUG:
+---------
+- werkzeug.utils.secure_filename: Sanitizes uploaded filenames
+  * Removes dangerous characters
+  * Prevents directory traversal attacks
+  * Makes filenames filesystem-safe
+
+PYTHON STANDARD LIBRARY:
+-------------------------
+- os: File system operations (create directories, check paths)
+- functools.wraps: Preserves function metadata in decorators
+- click: Command-line interface creation
+- datetime: Date and time handling
+- pytz: Timezone conversions (Philippine timezone)
+
+SQLALCHEMY:
+-----------
+- func: SQL aggregate functions (COUNT, SUM, etc.)
+- Used for complex queries and statistics
+
+================================================================================
+2. CONFIGURATION & INITIALIZATION
+================================================================================
+
+APP CONFIGURATION:
+------------------
+SECRET_KEY: 'supersecretkey'
+- Used for session encryption
+- Should be changed in production
+- Keeps user sessions secure
+
+SQLALCHEMY_DATABASE_URI: 'sqlite:///driftlens.db'
+- Database type: SQLite
+- Database file: driftlens.db
+- Located in project root
+- Single-file database
+
+SQLALCHEMY_TRACK_MODIFICATIONS: False
+- Disables modification tracking
+- Improves performance
+- Reduces memory usage
+
+UPLOAD_FOLDER: 'static/uploads'
+- Stores user-uploaded files
+- Images, videos, audio files
+- Automatically created if missing
+
+INITIALIZATION ORDER:
+---------------------
+1. Flask app created
+2. Database (SQLAlchemy) initialized
+3. Bcrypt initialized for password hashing
+4. Upload folder created
+5. LoginManager configured
+6. Philippine timezone set (Asia/Manila)
+7. Jinja2 filters registered
+
+TIMEZONE HANDLING:
+------------------
+PHILIPPINE_TZ = pytz.timezone('Asia/Manila')
+- All timestamps stored in UTC
+- Converted to Philippine time for display
+- Custom Jinja2 filter: |philippine_time
+
+================================================================================
+3. DATABASE MODELS (15 Models)
+================================================================================
+
+MODEL 1: USER
+-------------
+Table: user
+Purpose: Stores user accounts and profiles
+
+Fields:
+- id: Integer, Primary Key, Auto-increment
+- email: String(120), Unique, Not Null
+- password: String(200), Not Null (Bcrypt hashed)
+- role: String(20), Default='user' (user/admin/superadmin)
+- status: String(20), Default='active' (active/blocked/warned)
+- warning_count: Integer, Default=0
+- warning_message: Text, Nullable
+- last_warning_at: DateTime, Nullable
+- display_name: String(100), Nullable
+- bio: Text, Nullable
+- profile_picture: String(255), Nullable
+
+Relationships:
+- posts: One-to-Many with Post
+- comments: One-to-Many with Comment
+- post_likes: One-to-Many with PostLike
+- sent_friend_requests: One-to-Many with Friendship (as requester)
+- received_friend_requests: One-to-Many with Friendship (as addressee)
+- sent_messages: One-to-Many with Message (as sender)
+- received_messages: One-to-Many with Message (as recipient)
+- created_groups: One-to-Many with Group
+- group_memberships: One-to-Many with GroupMember
+- group_posts: One-to-Many with GroupPost
+- sent_invitations: One-to-Many with GroupInvitation (as inviter)
+- received_invitations: One-to-Many with GroupInvitation (as invitee)
+- reports_made: One-to-Many with UserReport (as reporter)
+- reports_received: One-to-Many with UserReport (as reported_user)
+- post_reports_made: One-to-Many with PostReport
+- shared_posts: One-to-Many with SharedPost
+- notifications: One-to-Many with Notification
+- viewed_posts: One-to-Many with PostView
+
+Mixins: UserMixin (from flask_login)
+- Provides: is_authenticated, is_active, is_anonymous, get_id()
+
+Password Handling:
+- Stored as Bcrypt hash (60 characters)
+- Salt automatically generated
+- Cannot be reversed/decrypted
+- Verified with bcrypt.check_password_hash()
+
+---
+
+MODEL 2: POST
+-------------
+Table: post
+Purpose: Stores blog posts (images, videos, audio)
+
+Fields:
+- id: Integer, Primary Key
+- title: String(200), Not Null
+- description: Text, Not Null
+- category: String(50), Not Null (photography/travel/adventure)
+- content_type: String(50), Not Null (MIME type)
+- file_path: String(255), Nullable (filename only)
+- tags: String(255), Nullable
+- views: Integer, Default=0
+- likes: Integer, Default=0
+- created_at: DateTime, Default=datetime.utcnow
+- user_id: Integer, Foreign Key to user.id
+
+Relationships:
+- user: Many-to-One with User
+- comments: One-to-Many with Comment (cascade delete)
+- post_likes: One-to-Many with PostLike (cascade delete)
+- reports: One-to-Many with PostReport
+- shares: One-to-Many with SharedPost
+- post_views: One-to-Many with PostView
+
+Properties:
+- author: Alias for user (for template compatibility)
+
+File Storage:
+- Only filename stored in database
+- Actual files in static/uploads/
+- Served via /uploads/<filename> route
+
+---
+
+MODEL 3: COMMENT
+----------------
+Table: comment
+Purpose: User comments on posts
+
+Fields:
+- id: Integer, Primary Key
+- content: Text, Not Null
+- created_at: DateTime, Default=datetime.utcnow
+- user_id: Integer, Foreign Key to user.id
+- post_id: Integer, Foreign Key to post.id
+
+Relationships:
+- user: Many-to-One with User
+- post: Many-to-One with Post
+
+Cascade: Deleted when post is deleted
+
+---
+
+MODEL 4: POSTLIKE
+-----------------
+Table: post_like
+Purpose: Tracks post likes (prevents duplicate likes)
+
+Fields:
+- id: Integer, Primary Key
+- user_id: Integer, Foreign Key to user.id
+- post_id: Integer, Foreign Key to post.id
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- user: Many-to-One with User
+- post: Many-to-One with Post
+
+Constraints:
+- UniqueConstraint('user_id', 'post_id')
+- Ensures one like per user per post
+
+---
+
+MODEL 5: FRIENDSHIP
+-------------------
+Table: friendship
+Purpose: Manages friend requests and friendships
+
+Fields:
+- id: Integer, Primary Key
+- requester_id: Integer, Foreign Key to user.id
+- addressee_id: Integer, Foreign Key to user.id
+- status: String(20), Default='pending' (pending/accepted/blocked)
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- requester: Many-to-One with User
+- addressee: Many-to-One with User
+
+Constraints:
+- UniqueConstraint('requester_id', 'addressee_id')
+- Prevents duplicate friend requests
+
+Status Flow:
+1. pending: Initial state when request sent
+2. accepted: Both users are friends
+3. blocked: Request declined/blocked
+
+---
+
+MODEL 6: MESSAGE
+----------------
+Table: message
+Purpose: Direct messages between users
+
+Fields:
+- id: Integer, Primary Key
+- sender_id: Integer, Foreign Key to user.id
+- recipient_id: Integer, Foreign Key to user.id
+- content: Text, Not Null
+- is_read: Boolean, Default=False
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- sender: Many-to-One with User
+- recipient: Many-to-One with User
+
+Read Status:
+- is_read=False: Unread (shows in notification count)
+- is_read=True: Read (marked when message opened)
+
+---
+
+MODEL 7: GROUP
+--------------
+Table: group
+Purpose: User groups/communities
+
+Fields:
+- id: Integer, Primary Key
+- name: String(100), Not Null
+- description: Text, Nullable
+- creator_id: Integer, Foreign Key to user.id
+- is_private: Boolean, Default=False
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- creator: Many-to-One with User
+- members: One-to-Many with GroupMember (cascade delete)
+- posts: One-to-Many with GroupPost (cascade delete)
+- invitations: One-to-Many with GroupInvitation
+
+Privacy:
+- is_private=False: Anyone can join
+- is_private=True: Invitation required
+
+---
+
+MODEL 8: GROUPMEMBER
+--------------------
+Table: group_member
+Purpose: Tracks group membership and roles
+
+Fields:
+- id: Integer, Primary Key
+- group_id: Integer, Foreign Key to group.id
+- user_id: Integer, Foreign Key to user.id
+- role: String(20), Default='member' (member/admin/moderator)
+- joined_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- user: Many-to-One with User
+- group: Many-to-One with Group
+
+Constraints:
+- UniqueConstraint('group_id', 'user_id')
+- Prevents duplicate memberships
+
+Roles:
+- member: Regular member
+- moderator: Can manage posts
+- admin: Full group control
+
+---
+
+MODEL 9: GROUPPOST
+------------------
+Table: group_post
+Purpose: Posts within groups
+
+Fields:
+- id: Integer, Primary Key
+- title: String(200), Not Null
+- content: Text, Not Null
+- group_id: Integer, Foreign Key to group.id
+- author_id: Integer, Foreign Key to user.id
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- author: Many-to-One with User
+- group: Many-to-One with Group
+
+Cascade: Deleted when group is deleted
+
+---
+
+MODEL 10: GROUPINVITATION
+--------------------------
+Table: group_invitation
+Purpose: Manages group invitations
+
+Fields:
+- id: Integer, Primary Key
+- group_id: Integer, Foreign Key to group.id
+- inviter_id: Integer, Foreign Key to user.id
+- invitee_id: Integer, Foreign Key to user.id
+- status: String(20), Default='pending' (pending/accepted/declined)
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- group: Many-to-One with Group
+- inviter: Many-to-One with User
+- invitee: Many-to-One with User
+
+Constraints:
+- UniqueConstraint('group_id', 'invitee_id')
+- Prevents duplicate invitations
+
+---
+
+MODEL 11: USERREPORT
+--------------------
+Table: user_report
+Purpose: User reports against other users
+
+Fields:
+- id: Integer, Primary Key
+- reporter_id: Integer, Foreign Key to user.id
+- reported_user_id: Integer, Foreign Key to user.id
+- reason: String(100), Not Null
+- description: Text, Nullable
+- status: String(20), Default='pending' (pending/reviewed/resolved)
+- admin_notes: Text, Nullable
+- created_at: DateTime, Default=datetime.utcnow
+- reviewed_at: DateTime, Nullable
+
+Relationships:
+- reporter: Many-to-One with User
+- reported_user: Many-to-One with User
+
+Admin Actions:
+- warn: Sends warning to reported user
+- block: Blocks reported user account
+- dismiss: No action taken
+
+---
+
+MODEL 12: POSTREPORT
+--------------------
+Table: post_report
+Purpose: Reports against inappropriate posts
+
+Fields:
+- id: Integer, Primary Key
+- reporter_id: Integer, Foreign Key to user.id
+- post_id: Integer, Foreign Key to post.id
+- reason: String(100), Not Null
+- description: Text, Nullable
+- decision: String(50), Nullable (remove/warn/ignore)
+- status: String(20), Default='pending'
+- admin_notes: Text, Nullable
+- created_at: DateTime, Default=datetime.utcnow
+- reviewed_at: DateTime, Nullable
+
+Relationships:
+- reporter: Many-to-One with User
+- post: Many-to-One with Post
+
+Admin Decisions:
+- remove: Delete the post
+- warn: Warn post author
+- ignore: No action
+
+---
+
+MODEL 13: SHAREDPOST
+--------------------
+Table: shared_post
+Purpose: Tracks post shares
+
+Fields:
+- id: Integer, Primary Key
+- user_id: Integer, Foreign Key to user.id
+- post_id: Integer, Foreign Key to post.id
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- user: Many-to-One with User
+- post: Many-to-One with Post
+
+Constraints:
+- UniqueConstraint('user_id', 'post_id')
+- Prevents duplicate shares
+
+---
+
+MODEL 14: NOTIFICATION
+----------------------
+Table: notification
+Purpose: User notifications for various events
+
+Fields:
+- id: Integer, Primary Key
+- user_id: Integer, Foreign Key to user.id
+- type: String(50), Not Null
+- title: String(200), Not Null
+- content: Text, Nullable
+- is_read: Boolean, Default=False
+- created_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- user: Many-to-One with User
+
+Notification Types:
+- friend_request: New friend request
+- message: New message received
+- group_invite: Group invitation
+- warning: Account warning
+- blocked: Account blocked
+- report_resolved: Report action taken
+- comment: New comment on post
+- like: Post liked
+
+---
+
+MODEL 15: POSTVIEW
+------------------
+Table: post_view
+Purpose: Tracks unique post views
+
+Fields:
+- id: Integer, Primary Key
+- post_id: Integer, Foreign Key to post.id
+- user_id: Integer, Foreign Key to user.id
+- viewed_at: DateTime, Default=datetime.utcnow
+
+Relationships:
+- post: Many-to-One with Post
+- user: Many-to-One with User
+
+Constraints:
+- UniqueConstraint('post_id', 'user_id')
+- Ensures one view per user per post
+
+View Logic:
+- Only logged-in users counted
+- Post creator views NOT counted
+- Duplicate views NOT counted
+
+================================================================================
+4. HELPER FUNCTIONS & DECORATORS
+================================================================================
+
+FUNCTION: to_philippine_time(utc_dt)
+------------------------------------
+Purpose: Convert UTC datetime to Philippine time
+Parameters: utc_dt (datetime object)
+Returns: Philippine timezone datetime
+Used By: Templates via philippine_time_filter
+
+Logic:
+1. Check if datetime is None → return None
+2. If no timezone info → localize to UTC
+3. Convert to Philippine timezone (Asia/Manila)
+
+---
+
+JINJA2 FILTER: philippine_time
+-------------------------------
+Template Usage: {{ post.created_at|philippine_time }}
+Purpose: Format UTC datetime in Philippine time
+Default Format: '%B %d, %Y at %I:%M %p'
+Example Output: "October 22, 2025 at 03:45 PM"
+
+---
+
+JINJA2 FILTER: display_name
+----------------------------
+Template Usage: {{ user|display_name }}
+Purpose: Get user's display name or email username
+Logic:
+1. If user.display_name exists → return it
+2. Else → return email username (part before @)
+
+---
+
+DECORATOR: @superadmin_required
+--------------------------------
+Purpose: Restrict routes to superadmin only
+Used On: All /superadmin/* routes
+
+Logic:
+1. Check if user is authenticated
+2. Check if user.role == 'superadmin'
+3. If not → flash error and redirect to index
+4. If yes → allow access
+
+Implementation:
+@wraps(f) preserves original function metadata
+
+---
+
+FUNCTION: @login_manager.user_loader
+-------------------------------------
+Purpose: Load user from session
+Called By: Flask-Login automatically
+Returns: User object or None
+
+Logic:
+1. Receives user_id from session
+2. Queries database: User.query.get(int(user_id))
+3. Returns User object
+
+================================================================================
+5. USER SIDE MODULES (28 Routes)
+================================================================================
+
+MODULE 1: INDEX / HOMEPAGE
+---------------------------
+Route: GET /
+Function: index()
+Authentication: Not Required
+Purpose: Landing page (guests) or user homepage (logged-in)
+
+Logic:
+1. Check if user is authenticated
+2. If YES:
+   - Query all posts (descending order)
+   - Query shared posts (last 10)
+   - Render home_user.html
+3. If NO (Guest):
+   - Query recent posts (9 posts)
+   - Query posts by category (3 each)
+   - Calculate category counts
+   - Render index.html
+
+Database Queries:
+- Post.query.order_by(Post.created_at.desc()).limit(9).all()
+- Post.query.filter_by(category='photography').limit(3).all()
+- db.session.query(Post.category, func.count(Post.id)).group_by(Post.category)
+
+Template Variables:
+- recent_posts, photography_posts, travel_posts, adventure_posts
+- category_counts (dictionary)
+
+---
+
+MODULE 2: GUEST CATEGORY BROWSING
+----------------------------------
+Route: GET /guest/category/<category>
+Function: guest_category_posts(category)
+Authentication: Not Required
+Purpose: Browse category posts without login
+
+Parameters:
+- category: photography/travel/adventure
+
+Logic:
+1. Query posts by category (descending order)
+2. Render guest_category.html
+3. Show login prompt on post click
+
+Database Query:
+- Post.query.filter_by(category=category).order_by(Post.created_at.desc()).all()
+
+Template Variables:
+- posts (list of Post objects)
+- category (string)
+
+---
+
+MODULE 3: GUEST EXPLORE PAGE
+-----------------------------
+Route: GET /guest/explore
+Function: guest_explore()
+Authentication: Not Required
+Purpose: Discover trending content without login
+
+Logic:
+1. Calculate 7 days ago timestamp
+2. Query trending posts (most views in last 7 days)
+3. Query popular posts (most likes all-time)
+4. Query recent posts
+5. Query top creators (users with most posts)
+6. Calculate category statistics
+7. Query active groups (most members)
+8. Render guest_explore.html
+
+Database Queries:
+- Post.query.filter(Post.created_at >= seven_days_ago).order_by(Post.views.desc()).limit(6)
+- Post.query.order_by(Post.likes.desc()).limit(6)
+- db.session.query(User, func.count(Post.id)).join(Post).group_by(User.id)
+- Group.query.join(GroupMember).group_by(Group.id).order_by(func.count(GroupMember.id).desc())
+
+Template Variables:
+- trending_posts, popular_posts, recent_posts
+- top_creators, category_stats, active_groups
+- is_guest=True
+
+---
+
+MODULE 4: USER CATEGORY POSTS
+------------------------------
+Route: GET /category/<category>
+Function: category_posts(category)
+Authentication: Required (@login_required)
+Purpose: View posts in specific category
+
+Parameters:
+- category: photography/travel/adventure
+
+Logic:
+1. Query posts by category
+2. Render category_posts.html with user navbar
+
+Database Query:
+- Post.query.filter_by(category=category).order_by(Post.id.desc()).all()
+
+Template Variables:
+- posts, category, user=current_user
+
+---
+
+MODULE 5: EXPLORE PAGE (LOGGED IN)
+-----------------------------------
+Route: GET /explore
+Function: explore()
+Authentication: Required (@login_required)
+Purpose: Discover content with full access
+
+Logic: Same as guest_explore() but with full interactivity
+
+Database Queries: Same as guest_explore()
+
+Template Variables:
+- trending_posts, popular_posts, recent_posts
+- top_creators, category_stats, active_groups
+
+---
+
+MODULE 6: VIEW POST
+-------------------
+Route: GET /post/<int:post_id>
+Function: view_post(post_id)
+Authentication: Required (@login_required)
+Purpose: View individual post with comments
+
+Parameters:
+- post_id: Integer
+
+Logic:
+1. Query post by ID (404 if not found)
+2. Check if user is authenticated
+3. Check if user is NOT post creator
+4. Check if view already recorded
+5. If new view:
+   - Create PostView record
+   - Increment post.views
+   - Commit to database
+6. Query all comments for post
+7. Render view_post.html
+
+Database Queries:
+- Post.query.get_or_404(post_id)
+- PostView.query.filter_by(post_id=post_id, user_id=current_user.id).first()
+- post.comments.order_by(Comment.created_at.desc()).all()
+
+View Tracking:
+- Only logged-in users
+- Exclude post creator
+- One view per user (unique constraint)
+
+Template Variables:
+- post, comments
+
+---
+
+MODULE 7: CREATE POST
+---------------------
+Route: POST /post/create
+Function: create_post()
+Authentication: Required (@login_required)
+Purpose: Upload new blog post
+
+Form Data:
+- title: String
+- description: Text
+- category: String
+- tags: String (optional)
+- file: File upload
+
+Logic:
+1. Get form data
+2. Validate file upload
+3. Sanitize filename with secure_filename()
+4. Save file to static/uploads/
+5. Get file MIME type
+6. Create Post object
+7. Save to database
+8. Redirect to homepage
+
+File Handling:
+- secure_filename() prevents directory traversal
+- Only filename stored in database
+- File saved to UPLOAD_FOLDER
+
+Database Operations:
+- Create new Post object
+- db.session.add(post)
+- db.session.commit()
+
+Security:
+- File validation
+- Filename sanitization
+- User authentication required
+
+---
+
+MODULE 8: LIKE POST
+-------------------
+Route: POST /post/<int:post_id>/like
+Function: like_post(post_id)
+Authentication: Required (@login_required)
+Purpose: Like/unlike a post
+
+Parameters:
+- post_id: Integer
+
+Logic:
+1. Query post by ID
+2. Check if user already liked post
+3. If liked:
+   - Delete PostLike record
+   - Decrement post.likes
+   - Return {"liked": false}
+4. If not liked:
+   - Create PostLike record
+   - Increment post.likes
+   - Return {"liked": true}
+5. Commit changes
+
+Database Queries:
+- Post.query.get_or_404(post_id)
+- PostLike.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+
+Response: JSON
+- {"liked": true/false, "likes": count}
+
+Unique Constraint:
+- UniqueConstraint prevents duplicate likes
+- Toggle behavior (like/unlike)
+
+---
+
+MODULE 9: SHARE POST
+--------------------
+Route: POST /post/<int:post_id>/share
+Function: share_post(post_id)
+Authentication: Required (@login_required)
+Purpose: Share post to user's profile
+
+Parameters:
+- post_id: Integer
+
+Logic:
+1. Query post by ID
+2. Check if already shared
+3. If not shared:
+   - Create SharedPost record
+   - Commit to database
+   - Return success
+4. If already shared:
+   - Return error message
+
+Database Queries:
+- Post.query.get_or_404(post_id)
+- SharedPost.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+
+Response: JSON
+- {"message": "success/error"}
+
+Unique Constraint:
+- Prevents duplicate shares
+
+---
+
+MODULE 10: COMMENT ON POST
+--------------------------
+Route: POST /post/<int:post_id>/comment
+Function: comment_post(post_id)
+Authentication: Required (@login_required)
+Purpose: Add comment to post
+
+Parameters:
+- post_id: Integer
+
+Form Data:
+- content: Text (from request.form)
+
+Logic:
+1. Get comment content
+2. Create Comment object
+3. Save to database
+4. Redirect to post page
+
+Database Operations:
+- Create new Comment object
+- db.session.add(comment)
+- db.session.commit()
+
+Validation:
+- Content required
+- User authentication required
+
+---
+
+MODULE 11: SEARCH
+-----------------
+Route: GET /search
+Function: search()
+Authentication: Required (@login_required)
+Purpose: Search posts and users
+
+Query Parameters:
+- q: Search query string
+
+Logic:
+1. Get search query from request.args
+2. Search posts (title and description)
+3. Search users (email and display_name)
+4. Render search_results.html
+
+Database Queries:
+- Post.query.filter(or_(Post.title.contains(q), Post.description.contains(q))).all()
+- User.query.filter(or_(User.email.contains(q), User.display_name.contains(q))).all()
+
+Template Variables:
+- query, posts, users
+
+Search Method:
+- Case-insensitive contains
+- Searches multiple fields
+- Returns all matches
+
+---
+
+MODULE 12: USER PROFILE
+-----------------------
+Route: GET /profile
+Function: profile()
+Authentication: Required (@login_required)
+Purpose: View own profile
+
+Logic:
+1. Query user's posts
+2. Count friends
+3. Count groups
+4. Render profile.html
+
+Database Queries:
+- Post.query.filter_by(user_id=current_user.id).order_by(Post.created_at.desc()).all()
+- Friendship.query.filter_by(requester_id=current_user.id, status='accepted').count()
+- GroupMember.query.filter_by(user_id=current_user.id).count()
+
+Template Variables:
+- posts, friend_count, group_count
+
+---
+
+MODULE 13: EDIT PROFILE
+-----------------------
+Route: GET/POST /profile/edit
+Function: edit_profile()
+Authentication: Required (@login_required)
+Purpose: Update profile information
+
+Form Data (POST):
+- display_name: String
+- bio: Text
+- profile_picture: File upload
+
+Logic:
+1. GET: Render edit form
+2. POST:
+   - Update display_name
+   - Update bio
+   - If file uploaded:
+     * Sanitize filename
+     * Save to uploads
+     * Update profile_picture path
+   - Commit changes
+   - Redirect to profile
+
+File Handling:
+- secure_filename() for safety
+- Stored in static/uploads/
+- Only filename in database
+
+---
+
+MODULE 14: VIEW USER PROFILE
+-----------------------------
+Route: GET /user/<int:user_id>
+Function: view_user_profile(user_id)
+Authentication: Required (@login_required)
+Purpose: View another user's profile
+
+Parameters:
+- user_id: Integer
+
+Logic:
+1. Query user by ID (404 if not found)
+2. Query user's public posts (last 10)
+3. Check friendship status
+4. Count user's friends
+5. Render user_profile.html
+
+Database Queries:
+- User.query.get_or_404(user_id)
+- Post.query.filter_by(user_id=user_id).order_by(Post.created_at.desc()).limit(10)
+- Friendship.query.filter(conditions).first()
+
+Template Variables:
+- user, user_posts, friendship_status, friend_count
+
+---
+
+MODULE 15: MESSAGES
+-------------------
+Route: GET /messages
+Function: messages()
+Authentication: Required (@login_required)
+Purpose: View all conversations
+
+Logic:
+1. Query all friends (accepted friendships)
+2. For each friend:
+   - Get last message
+   - Count unread messages
+3. Sort by last message time
+4. Render messages.html
+
+Database Queries:
+- Friendship.query.filter(conditions, status='accepted').all()
+- Message.query.filter(conditions).order_by(Message.created_at.desc()).first()
+- Message.query.filter(recipient_id=current_user.id, is_read=False).count()
+
+Template Variables:
+- conversations (list of dicts with friend, last_message, unread_count)
+
+---
+
+MODULE 16: VIEW CONVERSATION
+----------------------------
+Route: GET /messages/<int:user_id>
+Function: view_conversation(user_id)
+Authentication: Required (@login_required)
+Purpose: View messages with specific user
+
+Parameters:
+- user_id: Integer
+
+Logic:
+1. Query other user
+2. Query all messages between users
+3. Mark received messages as read
+4. Render conversation.html
+
+Database Queries:
+- User.query.get_or_404(user_id)
+- Message.query.filter(conditions).order_by(Message.created_at.asc()).all()
+
+Message Marking:
+- Set is_read=True for received messages
+- Commit changes
+
+Template Variables:
+- other_user, messages
+
+---
+
+MODULE 17: SEND MESSAGE
+-----------------------
+Route: POST /messages/send/<int:recipient_id>
+Function: send_message(recipient_id)
+Authentication: Required (@login_required)
+Purpose: Send message to user
+
+Parameters:
+- recipient_id: Integer
+
+Form Data:
+- content: Text
+
+Logic:
+1. Get message content
+2. Create Message object
+3. Create Notification for recipient
+4. Commit to database
+5. Redirect to conversation
+
+Database Operations:
+- Create new Message
+- Create new Notification (type='message')
+- db.session.add() for both
+- db.session.commit()
+
+Notification:
+- Type: 'message'
+- Title: 'New Message'
+- Content: Sender's name
+
+---
+
+MODULE 18: GROUPS
+-----------------
+Route: GET /groups
+Function: groups()
+Authentication: Required (@login_required)
+Purpose: View all groups
+
+Logic:
+1. Query user's groups
+2. Query public groups (not private)
+3. Render groups.html
+
+Database Queries:
+- GroupMember.query.filter_by(user_id=current_user.id).all()
+- Group.query.filter_by(is_private=False).all()
+
+Template Variables:
+- user_groups, public_groups
+
+---
+
+MODULE 19: CREATE GROUP
+-----------------------
+Route: GET/POST /groups/create
+Function: create_group()
+Authentication: Required (@login_required)
+Purpose: Create new group
+
+Form Data (POST):
+- name: String
+- description: Text
+- is_private: Boolean (checkbox)
+
+Logic:
+1. GET: Render create form
+2. POST:
+   - Create Group object
+   - Add creator as admin member
+   - Commit to database
+   - Redirect to group page
+
+Database Operations:
+- Create new Group
+- Create new GroupMember (role='admin')
+- db.session.add() for both
+- db.session.commit()
+
+Creator Role:
+- Automatically admin
+- Full group control
+
+---
+
+MODULE 20: VIEW GROUP
+---------------------
+Route: GET /groups/<int:group_id>
+Function: group_detail(group_id)
+Authentication: Required (@login_required)
+Purpose: View group details and posts
+
+Parameters:
+- group_id: Integer
+
+Logic:
+1. Query group by ID
+2. Check if user is member
+3. Query group posts
+4. Query group members
+5. Render group_detail.html
+
+Database Queries:
+- Group.query.get_or_404(group_id)
+- GroupMember.query.filter_by(group_id=group_id, user_id=current_user.id).first()
+- GroupPost.query.filter_by(group_id=group_id).order_by(GroupPost.created_at.desc()).all()
+- GroupMember.query.filter_by(group_id=group_id).all()
+
+Access Control:
+- If not member and private → redirect
+
+Template Variables:
+- group, is_member, posts, members
+
+---
+
+MODULE 21: JOIN GROUP
+---------------------
+Route: POST /groups/<int:group_id>/join
+Function: join_group(group_id)
+Authentication: Required (@login_required)
+Purpose: Join a group
+
+Parameters:
+- group_id: Integer
+
+Logic:
+1. Query group
+2. Check if already member
+3. If not member:
+   - Create GroupMember record
+   - Commit to database
+4. Redirect to group page
+
+Database Operations:
+- Create new GroupMember (role='member')
+- db.session.add(member)
+- db.session.commit()
+
+Validation:
+- Check group exists
+- Check not already member
+- Check group is public (or invited)
+
+---
+
+MODULE 22: LEAVE GROUP
+----------------------
+Route: POST /groups/<int:group_id>/leave
+Function: leave_group(group_id)
+Authentication: Required (@login_required)
+Purpose: Leave a group
+
+Parameters:
+- group_id: Integer
+
+Logic:
+1. Query membership
+2. If member:
+   - Delete GroupMember record
+   - Commit changes
+3. Redirect to groups page
+
+Database Operations:
+- db.session.delete(member)
+- db.session.commit()
+
+Validation:
+- Check membership exists
+- Cannot leave if creator (must delete group)
+
+---
+
+MODULE 23: POST IN GROUP
+------------------------
+Route: POST /groups/<int:group_id>/post
+Function: create_group_post(group_id)
+Authentication: Required (@login_required)
+Purpose: Create post in group
+
+Parameters:
+- group_id: Integer
+
+Form Data:
+- title: String
+- content: Text
+
+Logic:
+1. Check if user is member
+2. Create GroupPost object
+3. Commit to database
+4. Redirect to group page
+
+Database Operations:
+- Create new GroupPost
+- db.session.add(post)
+- db.session.commit()
+
+Validation:
+- Must be group member
+- Title and content required
+
+---
+
+MODULE 24: INVITE TO GROUP
+--------------------------
+Route: POST /groups/<int:group_id>/invite/<int:user_id>
+Function: invite_to_group(group_id, user_id)
+Authentication: Required (@login_required)
+Purpose: Invite user to group
+
+Parameters:
+- group_id: Integer
+- user_id: Integer
+
+Logic:
+1. Check if user is group member/admin
+2. Check if invitee not already member
+3. Check if invitation doesn't exist
+4. Create GroupInvitation
+5. Create Notification for invitee
+6. Commit to database
+
+Database Operations:
+- Create new GroupInvitation
+- Create new Notification (type='group_invite')
+- db.session.add() for both
+- db.session.commit()
+
+Validation:
+- Inviter must be member
+- Invitee not already member
+- No duplicate invitations
+
+---
+
+MODULE 25: RESPOND TO GROUP INVITATION
+---------------------------------------
+Route: POST /groups/invitation/<int:invitation_id>/<action>
+Function: respond_group_invitation(invitation_id, action)
+Authentication: Required (@login_required)
+Purpose: Accept/decline group invitation
+
+Parameters:
+- invitation_id: Integer
+- action: 'accept' or 'decline'
+
+Logic:
+1. Query invitation
+2. Check if for current user
+3. If accept:
+   - Update invitation status
+   - Create GroupMember record
+   - Create notification for inviter
+4. If decline:
+   - Update invitation status
+5. Commit changes
+6. Redirect to groups page
+
+Database Operations:
+- Update GroupInvitation.status
+- Create GroupMember (if accepted)
+- Create Notification
+- db.session.commit()
+
+---
+
+MODULE 26: GROUP INVITATIONS
+----------------------------
+Route: GET /groups/invitations
+Function: group_invitations()
+Authentication: Required (@login_required)
+Purpose: View pending group invitations
+
+Logic:
+1. Query pending invitations for current user
+2. Render group_invitations.html
+
+Database Query:
+- GroupInvitation.query.filter_by(invitee_id=current_user.id, status='pending').all()
+
+Template Variables:
+- invitations (list of GroupInvitation objects)
+
+---
+
+MODULE 27: NOTIFICATIONS
+------------------------
+Route: GET /notifications
+Function: notifications()
+Authentication: Required (@login_required)
+Purpose: View all notifications
+
+Logic:
+1. Query all notifications for user
+2. Mark all as read
+3. Render notifications.html
+
+Database Queries:
+- Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+
+Marking Read:
+- Set is_read=True for all
+- db.session.commit()
+
+Template Variables:
+- notifications (list of Notification objects)
+
+---
+
+MODULE 28: REPORT USER
+----------------------
+Route: GET/POST /report/user/<int:user_id>
+Function: report_user(user_id)
+Authentication: Required (@login_required)
+Purpose: Report another user
+
+Parameters:
+- user_id: Integer
+
+Form Data (POST):
+- reason: String
+- description: Text
+
+Logic:
+1. GET: Render report form
+2. POST:
+   - Create UserReport object
+   - Create Notification for admin
+   - Commit to database
+   - Redirect with success message
+
+Database Operations:
+- Create new UserReport
+- Create new Notification (type='report')
+- db.session.add() for both
+- db.session.commit()
+
+Validation:
+- Cannot report self
+- Reason required
+
+---
+
+MODULE 29: REPORT POST
+----------------------
+Route: POST /post/<int:post_id>/report
+Function: report_post(post_id)
+Authentication: Required (@login_required)
+Purpose: Report inappropriate post
+
+Parameters:
+- post_id: Integer
+
+Form Data:
+- reason: String
+- description: Text
+
+Logic:
+1. Create PostReport object
+2. Create Notification for admin
+3. Commit to database
+4. Return JSON response
+
+Database Operations:
+- Create new PostReport
+- Create new Notification
+- db.session.add() for both
+- db.session.commit()
+
+Response: JSON
+- {"message": "success"}
+
+================================================================================
+6. SUPERADMIN SIDE MODULES (10 Routes)
+================================================================================
+
+MODULE 1: ADMIN DASHBOARD
+-------------------------
+Route: GET /superadmin/dashboard
+Function: admin_dashboard()
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: Main admin control panel
+
+Logic:
+1. Count total users
+2. Count total posts
+3. Count pending user reports
+4. Count pending post reports
+5. Query recent reports
+6. Render dashboard.html
+
+Database Queries:
+- User.query.count()
+- Post.query.count()
+- UserReport.query.filter_by(status='pending').count()
+- PostReport.query.filter_by(status='pending').count()
+- UserReport.query.order_by(UserReport.created_at.desc()).limit(5).all()
+
+Template Variables:
+- total_users, total_posts
+- pending_user_reports, pending_post_reports
+- recent_reports
+
+Statistics:
+- Real-time counts
+- Recent activity
+- Pending actions
+
+---
+
+MODULE 2: MANAGE USERS
+----------------------
+Route: GET /superadmin/users
+Function: manage_users()
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: View and manage all users
+
+Logic:
+1. Query all users
+2. For each user:
+   - Count posts
+   - Count reports received
+3. Render users.html
+
+Database Queries:
+- User.query.all()
+- Post.query.filter_by(user_id=user.id).count()
+- UserReport.query.filter_by(reported_user_id=user.id).count()
+
+Template Variables:
+- users (list with stats)
+
+Admin Actions Available:
+- View user details
+- Block/unblock user
+- View user reports
+
+---
+
+MODULE 3: MANAGE POSTS
+----------------------
+Route: GET /superadmin/posts
+Function: manage_posts()
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: View and manage all posts
+
+Logic:
+1. Query all posts (descending order)
+2. Render posts.html
+
+Database Query:
+- Post.query.order_by(Post.created_at.desc()).all()
+
+Template Variables:
+- posts (list of Post objects)
+
+Admin Actions Available:
+- View post details
+- Delete post
+- View post reports
+
+---
+
+MODULE 4: VIEW USER REPORTS
+---------------------------
+Route: GET /superadmin/reports
+Function: view_reports()
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: View all user reports
+
+Logic:
+1. Query all user reports (descending order)
+2. Render reports.html
+
+Database Query:
+- UserReport.query.order_by(UserReport.created_at.desc()).all()
+
+Template Variables:
+- reports (list of UserReport objects)
+
+Report Details:
+- Reporter information
+- Reported user information
+- Reason and description
+- Status (pending/resolved)
+- Admin notes
+
+---
+
+MODULE 5: VIEW POST REPORTS
+---------------------------
+Route: GET /superadmin/post-reports
+Function: view_post_reports()
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: View all post reports
+
+Logic:
+1. Query all post reports (descending order)
+2. Render post_reports.html
+
+Database Query:
+- PostReport.query.order_by(PostReport.created_at.desc()).all()
+
+Template Variables:
+- reports (list of PostReport objects)
+
+Report Details:
+- Reporter information
+- Post information
+- Reason and description
+- Status
+- Admin decision
+
+---
+
+MODULE 6: RESOLVE USER REPORT
+------------------------------
+Route: POST /superadmin/reports/<int:report_id>/resolve
+Function: resolve_report(report_id)
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: Take action on user report
+
+Parameters:
+- report_id: Integer
+
+JSON Data:
+- action: 'warn', 'block', or 'dismiss'
+- admin_notes: Text
+- warning_message: Text (for warn/block)
+
+Logic:
+1. Query report
+2. Update report status to 'resolved'
+3. Add admin notes
+4. Set reviewed_at timestamp
+5. If action='warn':
+   - Set user status to 'warned'
+   - Increment warning_count
+   - Set warning_message
+   - Set last_warning_at
+   - Create notification for user
+6. If action='block':
+   - Set user status to 'blocked'
+   - Set warning_message
+   - Create notification for user
+7. Create notification for reporter
+8. Commit changes
+9. Return JSON response
+
+Database Operations:
+- Update UserReport fields
+- Update User status fields
+- Create Notification objects
+- db.session.commit()
+
+Warning System:
+- Tracks warning count
+- Stores custom message
+- Records timestamp
+- Notifies user
+
+Blocking:
+- Prevents login
+- Shows block message
+- Permanent until unblocked
+
+---
+
+MODULE 7: RESOLVE POST REPORT
+------------------------------
+Route: POST /superadmin/post_reports/<int:report_id>/resolve
+Function: resolve_post_report(report_id)
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: Take action on post report
+
+Parameters:
+- report_id: Integer
+
+JSON Data:
+- decision: 'remove', 'warn', or 'ignore'
+- admin_notes: Text
+
+Logic:
+1. Query report
+2. Update report status to 'resolved'
+3. Set decision
+4. Add admin notes
+5. Set reviewed_at timestamp
+6. If decision='remove':
+   - Delete post
+7. If decision='warn':
+   - Create notification for post author
+8. Create notification for reporter
+9. Commit changes
+10. Return JSON response
+
+Database Operations:
+- Update PostReport fields
+- Delete Post (if remove)
+- Create Notification objects
+- db.session.commit()
+
+Decisions:
+- remove: Delete post permanently
+- warn: Notify author
+- ignore: No action
+
+---
+
+MODULE 8: BLOCK USER
+--------------------
+Route: POST /superadmin/users/<int:user_id>/block
+Function: block_user(user_id)
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: Block user account
+
+Parameters:
+- user_id: Integer
+
+Logic:
+1. Query user
+2. Set user.status = 'blocked'
+3. Commit changes
+4. Return JSON response
+
+Database Operations:
+- Update User.status
+- db.session.commit()
+
+Effect:
+- User cannot login
+- Existing session invalidated
+- Shows block message on login
+
+---
+
+MODULE 9: UNBLOCK USER
+----------------------
+Route: POST /superadmin/users/<int:user_id>/unblock
+Function: unblock_user(user_id)
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: Unblock user account
+
+Parameters:
+- user_id: Integer
+
+Logic:
+1. Query user
+2. Set user.status = 'active'
+3. Clear warning fields
+4. Commit changes
+5. Return JSON response
+
+Database Operations:
+- Update User.status
+- Clear warning_message
+- Set warning_count = 0
+- db.session.commit()
+
+Effect:
+- User can login again
+- Warnings cleared
+- Fresh start
+
+---
+
+MODULE 10: DELETE POST
+----------------------
+Route: POST /superadmin/posts/<int:post_id>/delete
+Function: delete_post(post_id)
+Authentication: Required (@login_required, @superadmin_required)
+Purpose: Delete post permanently
+
+Parameters:
+- post_id: Integer
+
+Logic:
+1. Query post
+2. Delete file from uploads folder
+3. Delete post from database
+4. Commit changes
+5. Redirect to posts page
+
+Database Operations:
+- db.session.delete(post)
+- db.session.commit()
+
+Cascade Effects:
+- Deletes all comments
+- Deletes all likes
+- Deletes all shares
+- Deletes all reports
+- Deletes file from disk
+
+File Deletion:
+- os.remove(file_path)
+- Removes from static/uploads/
+
+================================================================================
+7. API ENDPOINTS (12 Routes)
+================================================================================
+
+API 1: NOTIFICATION COUNT
+-------------------------
+Route: GET /api/notifications/count
+Function: notification_count()
+Authentication: Required (@login_required)
+Purpose: Get unread notification count
+
+Response: JSON
+{
+  "count": 5
+}
+
+Database Query:
+- Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+
+Used By:
+- Navbar notification badge
+- Real-time updates via JavaScript
+
+---
+
+API 2: MESSAGE COUNT
+--------------------
+Route: GET /api/messages/count
+Function: message_count()
+Authentication: Required (@login_required)
+Purpose: Get unread message count
+
+Response: JSON
+{
+  "count": 3
+}
+
+Database Query:
+- Message.query.filter_by(recipient_id=current_user.id, is_read=False).count()
+
+Used By:
+- Navbar message badge
+- Real-time updates
+
+---
+
+API 3: FRIEND REQUEST COUNT
+---------------------------
+Route: GET /api/friend_requests/count
+Function: friend_request_count()
+Authentication: Required (@login_required)
+Purpose: Get pending friend request count
+
+Response: JSON
+{
+  "count": 2
+}
+
+Database Query:
+- Friendship.query.filter_by(addressee_id=current_user.id, status='pending').count()
+
+Used By:
+- Navbar friend request badge
+
+---
+
+API 4: GROUP INVITATION COUNT
+-----------------------------
+Route: GET /api/group_invitations/count
+Function: group_invitation_count()
+Authentication: Required (@login_required)
+Purpose: Get pending group invitation count
+
+Response: JSON
+{
+  "count": 1
+}
+
+Database Query:
+- GroupInvitation.query.filter_by(invitee_id=current_user.id, status='pending').count()
+
+Used By:
+- Navbar group invitation badge
+
+---
+
+API 5: SEND FRIEND REQUEST
+--------------------------
+Route: POST /api/friend_request/send/<int:user_id>
+Function: send_friend_request(user_id)
+Authentication: Required (@login_required)
+Purpose: Send friend request to user
+
+Parameters:
+- user_id: Integer
+
+Response: JSON
+{
+  "message": "Friend request sent!"
+}
+
+Logic:
+1. Check if friendship exists
+2. If not:
+   - Create Friendship record
+   - Create Notification for addressee
+   - Commit to database
+
+Database Operations:
+- Create new Friendship (status='pending')
+- Create new Notification (type='friend_request')
+- db.session.commit()
+
+---
+
+API 6: RESPOND TO FRIEND REQUEST
+--------------------------------
+Route: POST /api/friend_request/<int:request_id>/<action>
+Function: respond_friend_request(request_id, action)
+Authentication: Required (@login_required)
+Purpose: Accept/decline friend request
+
+Parameters:
+- request_id: Integer
+- action: 'accept' or 'decline'
+
+Response: JSON
+{
+  "message": "Friend request accepted!"
+}
+
+Logic:
+1. Query friendship
+2. If accept:
+   - Set status='accepted'
+   - Create notification for requester
+3. If decline:
+   - Delete friendship record
+4. Commit changes
+
+Database Operations:
+- Update Friendship.status or delete
+- Create Notification
+- db.session.commit()
+
+---
+
+API 7: UNFRIEND
+---------------
+Route: POST /api/unfriend/<int:user_id>
+Function: unfriend(user_id)
+Authentication: Required (@login_required)
+Purpose: Remove friend
+
+Parameters:
+- user_id: Integer
+
+Response: JSON
+{
+  "message": "Unfriended successfully!"
+}
+
+Logic:
+1. Query friendship (bidirectional)
+2. Delete friendship record
+3. Commit changes
+
+Database Operations:
+- db.session.delete(friendship)
+- db.session.commit()
+
+---
+
+API 8: SEARCH USERS
+-------------------
+Route: GET /api/search/users
+Function: search_users()
+Authentication: Required (@login_required)
+Purpose: Search users for friend requests/invites
+
+Query Parameters:
+- q: Search query
+
+Response: JSON
+[
+  {
+    "id": 1,
+    "email": "user@example.com",
+    "display_name": "John Doe"
+  }
+]
+
+Database Query:
+- User.query.filter(or_(User.email.contains(q), User.display_name.contains(q))).limit(10).all()
+
+Used By:
+- Friend request modal
+- Group invitation modal
+
+---
+
+API 9: UPLOADED FILE
+--------------------
+Route: GET /uploads/<filename>
+Function: uploaded_file(filename)
+Authentication: Not Required
+Purpose: Serve uploaded files
+
+Parameters:
+- filename: String
+
+Response: File
+
+Logic:
+1. Serve file from UPLOAD_FOLDER
+2. Use send_from_directory for security
+
+Security:
+- Prevents directory traversal
+- Only serves from uploads folder
+- Filename validated by Flask
+
+---
+
+API 10: DISMISS WARNING
+-----------------------
+Route: POST /dismiss_warning
+Function: dismiss_warning()
+Authentication: Required (@login_required)
+Purpose: Acknowledge warning popup
+
+Response: JSON
+{
+  "message": "Warning acknowledged"
+}
+
+Logic:
+1. Remove warning flags from session
+2. Return success
+
+Session Operations:
+- session.pop('show_warning')
+- session.pop('warning_message')
+- session.pop('warning_count')
+
+---
+
+API 11: CHECK LIKE STATUS
+-------------------------
+Route: GET /api/post/<int:post_id>/like_status
+Function: check_like_status(post_id)
+Authentication: Required (@login_required)
+Purpose: Check if user liked post
+
+Parameters:
+- post_id: Integer
+
+Response: JSON
+{
+  "liked": true,
+  "likes": 42
+}
+
+Database Query:
+- PostLike.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+
+Used By:
+- Post like button state
+- Real-time updates
+
+---
+
+API 12: GET POST COMMENTS
+-------------------------
+Route: GET /api/post/<int:post_id>/comments
+Function: get_comments(post_id)
+Authentication: Required (@login_required)
+Purpose: Get all comments for post
+
+Parameters:
+- post_id: Integer
+
+Response: JSON
+[
+  {
+    "id": 1,
+    "content": "Great post!",
+    "user": "John Doe",
+    "created_at": "2025-10-22T15:30:00"
+  }
+]
+
+Database Query:
+- Comment.query.filter_by(post_id=post_id).order_by(Comment.created_at.desc()).all()
+
+Used By:
+- Dynamic comment loading
+- Real-time updates
+
+================================================================================
+8. SECURITY & AUTHENTICATION
+================================================================================
+
+PASSWORD HASHING:
+-----------------
+Library: Flask-Bcrypt
+Algorithm: bcrypt
+Salt Rounds: 12 (default)
+
+Registration Process:
+1. User submits password
+2. bcrypt.generate_password_hash(password)
+3. Hash stored in database (60 characters)
+4. Original password never stored
+
+Login Process:
+1. User submits password
+2. Query user by email
+3. bcrypt.check_password_hash(stored_hash, submitted_password)
+4. If match → login_user()
+5. If no match → error message
+
+Hash Format:
+$2b$12$[salt][hash]
+- $2b: bcrypt version
+- $12: cost factor (2^12 iterations)
+- [salt]: random salt
+- [hash]: password hash
+
+Security Benefits:
+- One-way encryption
+- Rainbow table resistant
+- Brute-force resistant
+- Unique salt per password
+
+---
+
+SESSION MANAGEMENT:
+-------------------
+Library: Flask-Login
+Storage: Server-side sessions
+Cookie: session (encrypted)
+
+Login Flow:
+1. User authenticates
+2. login_user(user) called
+3. Session created
+4. Cookie sent to browser
+5. Cookie encrypted with SECRET_KEY
+
+Session Data:
+- user_id: Integer
+- _fresh: Boolean (fresh login)
+- _id: Session ID
+- Custom data (warnings, etc.)
+
+Session Security:
+- Encrypted with SECRET_KEY
+- HttpOnly cookie (no JavaScript access)
+- Secure flag (HTTPS only in production)
+- SameSite=Lax (CSRF protection)
+
+---
+
+ACCESS CONTROL:
+---------------
+Decorator: @login_required
+Purpose: Protect routes from unauthenticated access
+
+Implementation:
+1. Check if user is authenticated
+2. If not → redirect to login page
+3. If yes → allow access
+
+Custom Decorator: @superadmin_required
+Purpose: Restrict to superadmin only
+
+Implementation:
+1. Check authentication
+2. Check user.role == 'superadmin'
+3. If not → flash error and redirect
+4. If yes → allow access
+
+---
+
+FILE UPLOAD SECURITY:
+---------------------
+Function: secure_filename()
+Purpose: Sanitize uploaded filenames
+
+Protections:
+- Removes directory traversal (../)
+- Removes special characters
+- Converts to ASCII
+- Replaces spaces with underscores
+
+Example:
+Input: "../../../etc/passwd"
+Output: "etc_passwd"
+
+Input: "My Photo!@#.jpg"
+Output: "My_Photo.jpg"
+
+Additional Security:
+- File type validation
+- File size limits (configured in web server)
+- Stored in isolated directory
+- Served via dedicated route
+
+---
+
+SQL INJECTION PROTECTION:
+--------------------------
+ORM: SQLAlchemy
+Method: Parameterized queries
+
+How It Works:
+- All queries use parameter binding
+- User input never directly in SQL
+- SQLAlchemy escapes all values
+
+Example:
+UNSAFE:
+f"SELECT * FROM user WHERE email = '{email}'"
+
+SAFE (SQLAlchemy):
+User.query.filter_by(email=email).first()
+
+SQLAlchemy generates:
+SELECT * FROM user WHERE email = ?
+Parameters: [email]
+
+---
+
+CSRF PROTECTION:
+----------------
+Method: SameSite cookies
+Additional: Could add Flask-WTF for forms
+
+Current Protection:
+- SameSite=Lax cookie attribute
+- Prevents cross-site request forgery
+- Cookies not sent with cross-origin requests
+
+Enhanced Protection (Optional):
+- Flask-WTF CSRF tokens
+- Token in every form
+- Validated on submission
+
+---
+
+XSS PROTECTION:
+---------------
+Method: Jinja2 auto-escaping
+Status: Enabled by default
+
+How It Works:
+- All template variables escaped
+- HTML entities converted
+- JavaScript cannot execute
+
+Example:
+User input: <script>alert('XSS')</script>
+Rendered: &lt;script&gt;alert('XSS')&lt;/script&gt;
+
+Manual Escaping:
+- {{ variable|e }}: Force escape
+- {{ variable|safe }}: Disable escape (dangerous)
+
+---
+
+AUTHORIZATION CHECKS:
+---------------------
+Pattern: Check ownership before actions
+
+Example (Edit Post):
+1. Query post
+2. Check if post.user_id == current_user.id
+3. If not → error/redirect
+4. If yes → allow edit
+
+Example (Group Actions):
+1. Query group
+2. Query membership
+3. Check role (member/admin)
+4. Allow/deny based on role
+
+Friendship Checks:
+1. Query friendship
+2. Check status (pending/accepted)
+3. Allow actions based on status
+
+================================================================================
+9. FILE HANDLING
+================================================================================
+
+UPLOAD CONFIGURATION:
+---------------------
+Folder: static/uploads/
+Created: Automatically if missing
+Permissions: Read/write for application
+
+File Types Supported:
+- Images: JPEG, PNG, GIF, WebP
+- Videos: MP4, WebM, OGG
+- Audio: MP3, WAV, OGG
+
+---
+
+UPLOAD PROCESS:
+---------------
+1. User selects file in form
+2. File sent via POST request
+3. Server receives file object
+4. secure_filename() sanitizes name
+5. File saved to UPLOAD_FOLDER
+6. Filename stored in database
+7. Success response sent
+
+Code Flow:
+```python
+file = request.files['file']
+filename = secure_filename(file.filename)
+file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+file.save(file_path)
+```
+
+---
+
+FILE SERVING:
+-------------
+Route: /uploads/<filename>
+Function: uploaded_file(filename)
+Method: send_from_directory()
+
+Security:
+- Prevents directory traversal
+- Only serves from UPLOAD_FOLDER
+- Validates filename
+
+Example:
+Request: /uploads/photo.jpg
+Serves: static/uploads/photo.jpg
+
+---
+
+FILE DELETION:
+--------------
+When: Post deleted by admin
+Process:
+1. Query post
+2. Get file_path
+3. Construct full path
+4. os.remove(full_path)
+5. Delete post from database
+
+Error Handling:
+- Check if file exists
+- Handle permission errors
+- Continue even if file missing
+
+---
+
+FILE STORAGE STRUCTURE:
+-----------------------
+static/
+  uploads/
+    image1.jpg
+    video1.mp4
+    audio1.mp3
+    profile_pic1.jpg
+
+Database Storage:
+- Only filename stored
+- Not full path
+- Reconstructed when needed
+
+Benefits:
+- Easy to move files
+- Simple backups
+- Flexible storage
+
+---
+
+MIME TYPE DETECTION:
+--------------------
+Method: From file extension
+Storage: content_type field
+
+Common Types:
+- image/jpeg
+- image/png
+- image/gif
+- image/webp
+- video/mp4
+- video/webm
+- audio/mp3
+- audio/wav
+
+Used For:
+- Template rendering
+- Browser display
+- Download headers
+
+---
+
+FILE SIZE LIMITS:
+-----------------
+Configuration: Web server level
+Recommended: 16MB for images, 100MB for videos
+
+Flask Configuration (Optional):
+```python
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+```
+
+Handling Large Files:
+- Chunked upload
+- Progress indicators
+- Compression before upload
+
+---
+
+FILE VALIDATION:
+----------------
+Checks:
+1. File exists
+2. Filename not empty
+3. Extension allowed
+4. MIME type valid
+
+Example:
+```python
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'mp3', 'wav'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+```
+
+================================================================================
+10. DATABASE RELATIONSHIPS
+================================================================================
+
+ONE-TO-MANY RELATIONSHIPS:
+--------------------------
+
+User → Posts:
+- One user has many posts
+- user.posts (list of Post objects)
+- post.user (User object)
+
+User → Comments:
+- One user has many comments
+- user.comments (list of Comment objects)
+- comment.user (User object)
+
+Post → Comments:
+- One post has many comments
+- post.comments (dynamic query)
+- comment.post (Post object)
+
+User → Messages (Sent):
+- One user sends many messages
+- user.sent_messages (list)
+- message.sender (User object)
+
+User → Messages (Received):
+- One user receives many messages
+- user.received_messages (list)
+- message.recipient (User object)
+
+Group → Members:
+- One group has many members
+- group.members (dynamic query)
+- member.group (Group object)
+
+Group → Posts:
+- One group has many posts
+- group.posts (dynamic query)
+- post.group (Group object)
+
+---
+
+MANY-TO-MANY RELATIONSHIPS:
+---------------------------
+
+Users ↔ Friends:
+- Implemented via Friendship table
+- Self-referential relationship
+- user.sent_friend_requests
+- user.received_friend_requests
+
+Users ↔ Groups:
+- Implemented via GroupMember table
+- user.group_memberships
+- group.members
+
+Users ↔ Liked Posts:
+- Implemented via PostLike table
+- user.post_likes
+- post.post_likes
+
+---
+
+CASCADE OPERATIONS:
+-------------------
+
+Post Deletion:
+- Deletes all comments
+- Deletes all likes
+- Deletes all shares
+- Deletes all reports
+- Deletes all views
+
+Group Deletion:
+- Deletes all members
+- Deletes all posts
+- Deletes all invitations
+
+User Deletion (Not Implemented):
+- Would need to handle:
+  * Posts
+  * Comments
+  * Messages
+  * Friendships
+  * Group memberships
+
+---
+
+UNIQUE CONSTRAINTS:
+-------------------
+
+PostLike:
+- (user_id, post_id)
+- Prevents duplicate likes
+
+Friendship:
+- (requester_id, addressee_id)
+- Prevents duplicate requests
+
+GroupMember:
+- (group_id, user_id)
+- Prevents duplicate memberships
+
+GroupInvitation:
+- (group_id, invitee_id)
+- Prevents duplicate invitations
+
+SharedPost:
+- (user_id, post_id)
+- Prevents duplicate shares
+
+PostView:
+- (post_id, user_id)
+- Ensures unique view tracking
+
+---
+
+FOREIGN KEY RELATIONSHIPS:
+--------------------------
+
+All foreign keys use:
+- db.ForeignKey("table.column")
+- nullable=False (required)
+- Indexed automatically
+
+Relationship Options:
+- backref: Creates reverse relationship
+- lazy: Query loading strategy
+  * 'dynamic': Returns query object
+  * 'select': Returns list (default)
+- cascade: Deletion behavior
+  * 'all, delete-orphan': Delete children
+
+---
+
+QUERY OPTIMIZATION:
+-------------------
+
+Lazy Loading:
+- Default for most relationships
+- Loads data when accessed
+- N+1 query problem possible
+
+Eager Loading:
+- Use .options(joinedload(relationship))
+- Loads related data in one query
+- Better for lists
+
+Dynamic Queries:
+- lazy='dynamic' on relationship
+- Returns query object
+- Can add filters before executing
+
+Example:
+post.comments.filter_by(user_id=1).all()
+
+================================================================================
+                            END OF DOCUMENTATION
+================================================================================
+
+This documentation covers all modules, functions, imports, security measures,
+and database relationships in the DriftLens blog platform. Each module includes
+detailed explanations of its purpose, logic, database operations, and security
+considerations.
+
+For questions or clarifications, refer to the specific module section above.
+
+Generated: October 22, 2025
+Version: 1.0
+Platform: DriftLens Blog Platform
+

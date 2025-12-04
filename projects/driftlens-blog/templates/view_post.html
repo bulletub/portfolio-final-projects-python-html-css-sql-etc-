@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{{ post.title }} | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+        body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+        .title-font { font-family: 'Playfair Display', serif; }
+    </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+<link href="/static/css/styles.css" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+{% if current_user.is_authenticated %}
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}" title="Messages">
+<i data-feather="message-circle" class="w-5 h-5"></i>
+<span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}" title="Groups">
+<i data-feather="users" class="w-5 h-5"></i>
+<span id="group-invitation-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}" title="Notifications">
+<i data-feather="bell" class="w-5 h-5"></i>
+<span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium" href="{{ url_for('profile') }}" title="Profile">
+<i data-feather="user" class="w-5 h-5"></i>
+</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">
+Logout
+</a>
+</div>
+<!-- Mobile menu button -->
+<div class="md:hidden flex items-center space-x-2">
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+{% else %}
+<div class="flex items-center space-x-4">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700" href="{{ url_for('login') }}">Login</a>
+</div>
+{% endif %}
+</div>
+{% if current_user.is_authenticated %}
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+  <i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='photography') }}">
+  <i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='travel') }}">
+  <i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='adventure') }}">
+  <i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('messages') }}">
+  <i data-feather="message-circle" class="w-4 h-4 inline mr-2"></i>Messages
+  <span id="mobile-message-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('groups') }}">
+  <i data-feather="users" class="w-4 h-4 inline mr-2"></i>Groups
+  <span id="mobile-group-invitation-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('notifications') }}">
+  <i data-feather="bell" class="w-4 h-4 inline mr-2"></i>Notifications
+  <span id="mobile-notification-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('profile') }}">
+  <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Profile
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-red-500 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 text-center" href="{{ url_for('logout') }}">
+  <i data-feather="log-out" class="w-4 h-4 inline mr-2"></i>Logout
+</a>
+</div>
+</div>
+{% endif %}
+</div>
+</nav>
+<section class="py-16">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="bg-white rounded-lg shadow-xl overflow-hidden">
+                {% if post.file_path %}
+                    {% if post.content_type == 'image' %}
+                        <img alt="{{ post.title }}" class="w-full h-auto object-cover" src="{{ url_for('uploaded_file', filename=post.file_path) }}"/>
+                    {% elif post.content_type == 'video' %}
+                        <video class="w-full" controls="">
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="video/mp4"/>
+                            Your browser does not support the video tag.
+                        </video>
+                    {% elif post.content_type == 'audio' %}
+                        <audio class="w-full" controls="">
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="audio/mpeg"/>
+                            Your browser does not support the audio element.
+                        </audio>
+                    {% endif %}
+                {% else %}
+                    <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
+                        <span class="text-gray-500 text-lg">No media file available</span>
+                    </div>
+                {% endif %}
+
+                <div class="p-8 md:p-12">
+<span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase mb-4">{{ post.category }}</span>
+<h1 class="text-3xl md:text-4xl font-bold title-font mb-4">{{ post.title }}</h1>
+<div class="flex items-center text-sm text-gray-500 mb-6">
+<span>By {{ post.user.email }}</span>
+<span class="mx-2">•</span>
+<span>{{ post.views }} views</span>
+<span class="mx-2">•</span>
+                <span>{{ post.created_at|philippine_time('%B %d, %Y') }}</span>
+</div>
+<p class="text-lg text-gray-700 leading-relaxed">{{ post.description }}</p>
+
+<!-- Social Actions -->
+<div class="mt-8 flex items-center justify-between border-t border-gray-200 pt-6">
+<div class="flex items-center space-x-6">
+<button class="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition duration-300" onclick="toggleLike({{ post.id }})">
+<i class="w-5 h-5" data-feather="heart" id="like-icon-{{ post.id }}"></i>
+<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
+<span>Likes</span>
+</button>
+<button class="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition duration-300" onclick="sharePost({{ post.id }})">
+<i class="w-5 h-5" data-feather="share-2"></i>
+<span>Share</span>
+</button>
+<button class="flex items-center space-x-2 text-gray-600 hover:text-green-500 transition duration-300" onclick="scrollToComments()">
+<i class="w-5 h-5" data-feather="message-circle"></i>
+<span>{{ comments|length }} Comments</span>
+</button>
+</div>
+{% if current_user.is_authenticated and current_user.id != post.user_id %}
+<a href="{{ url_for('report_post', post_id=post.id) }}" class="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition duration-300">
+<i class="w-5 h-5" data-feather="flag"></i>
+<span>Report</span>
+</a>
+{% endif %}
+</div>
+
+                    {% if post.tags %}
+                    <div class="mt-8">
+<h3 class="text-md font-semibold mb-2">Tags:</h3>
+<div class="flex flex-wrap gap-2">
+                            {% for tag in post.tags.split(',') %}
+                            <span class="bg-gray-200 text-gray-700 text-sm font-medium px-3 py-1 rounded-full">{{ tag.strip() }}</span>
+                            {% endfor %}
+                        </div>
+</div>
+                    {% endif %}
+                </div>
+</div>
+</div>
+
+<!-- Comments Section -->
+<section class="py-16 bg-gray-50" id="comments-section">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="bg-white rounded-lg shadow-lg p-8">
+<h2 class="text-2xl font-bold title-font mb-6">Comments ({{ comments|length }})</h2>
+
+<!-- Add Comment Form -->
+{% if current_user.is_authenticated %}
+<form action="{{ url_for('comment_post', post_id=post.id) }}" method="POST" class="mb-8">
+<div class="flex space-x-4">
+<textarea name="content" placeholder="Write a comment..." class="flex-1 px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" required></textarea>
+<button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300">
+<i class="w-5 h-5" data-feather="send"></i>
+</button>
+</div>
+</form>
+{% else %}
+<div class="mb-8 p-4 bg-gray-100 rounded-md text-center">
+<p class="text-gray-600">Please <a href="{{ url_for('login') }}" class="text-blue-600 hover:underline">login</a> to comment on this post.</p>
+</div>
+{% endif %}
+
+<!-- Comments List -->
+<div class="space-y-6">
+{% for comment in comments %}
+<div class="border-l-4 border-blue-500 pl-4">
+<div class="flex items-center space-x-3 mb-2">
+<div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+<span class="text-xs font-semibold text-gray-600">{{ comment.user.email[0].upper() }}</span>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800">{{ comment.user.email.split('@')[0] }}</h4>
+                <p class="text-sm text-gray-500">{{ comment.created_at|philippine_time }}</p>
+</div>
+</div>
+<p class="text-gray-700">{{ comment.content }}</p>
+</div>
+{% endfor %}
+
+{% if not comments %}
+<div class="text-center py-8">
+<i class="w-12 h-12 text-gray-400 mx-auto mb-4" data-feather="message-circle"></i>
+<p class="text-gray-500">No comments yet. Be the first to comment!</p>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<script>
+        feather.replace();
+        
+        // Initialize like button state
+        {% if user_liked %}
+        document.getElementById('like-icon-{{ post.id }}').classList.add('text-red-500', 'fill-current');
+        {% endif %}
+        
+        function toggleLike(postId) {
+            fetch(`/like_post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const likeIcon = document.getElementById(`like-icon-${postId}`);
+                const likeCount = document.getElementById(`like-count-${postId}`);
+                
+                likeCount.textContent = data.likes_count;
+                
+                if (data.liked) {
+                    likeIcon.classList.add('text-red-500', 'fill-current');
+                } else {
+                    likeIcon.classList.remove('text-red-500', 'fill-current');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error liking post. Please try again.');
+            });
+        }
+        
+        function sharePost(postId) {
+            fetch(`/share_post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (navigator.share) {
+                    navigator.share({
+                        title: data.title,
+                        url: data.share_url
+                    }).catch(() => {
+                        // If sharing fails, copy to clipboard
+                        navigator.clipboard.writeText(data.share_url).then(() => {
+                            alert(data.message + '\nLink copied to clipboard!');
+                        });
+                    });
+                } else {
+                    // Fallback: copy to clipboard
+                    navigator.clipboard.writeText(data.share_url).then(() => {
+                        alert(data.message + '\nLink copied to clipboard!');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sharing post. Please try again.');
+            });
+        }
+        
+        function scrollToComments() {
+            document.getElementById('comments-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Load notification counts
+        {% if current_user.is_authenticated %}
+        function loadNotificationCounts() {
+            fetch('/get_notification_counts')
+                .then(response => response.json())
+                .then(data => {
+                    // Update desktop message count
+                    const messageCount = document.getElementById('message-count');
+                    const mobileMessageCount = document.getElementById('mobile-message-count');
+                    if (data.messages > 0) {
+                        if (messageCount) {
+                            messageCount.textContent = data.messages;
+                            messageCount.classList.remove('hidden');
+                        }
+                        if (mobileMessageCount) {
+                            mobileMessageCount.textContent = data.messages;
+                            mobileMessageCount.classList.remove('hidden');
+                        }
+                    } else {
+                        if (messageCount) messageCount.classList.add('hidden');
+                        if (mobileMessageCount) mobileMessageCount.classList.add('hidden');
+                    }
+                    
+                    // Update notification count
+                    const notificationCount = document.getElementById('notification-count');
+                    const mobileNotificationCount = document.getElementById('mobile-notification-count');
+                    if (data.notifications > 0) {
+                        if (notificationCount) {
+                            notificationCount.textContent = data.notifications;
+                            notificationCount.classList.remove('hidden');
+                        }
+                        if (mobileNotificationCount) {
+                            mobileNotificationCount.textContent = data.notifications;
+                            mobileNotificationCount.classList.remove('hidden');
+                        }
+                    } else {
+                        if (notificationCount) notificationCount.classList.add('hidden');
+                        if (mobileNotificationCount) mobileNotificationCount.classList.add('hidden');
+                    }
+                    
+                    // Update group invitation count
+                    const groupInvitationCount = document.getElementById('group-invitation-count');
+                    const mobileGroupInvitationCount = document.getElementById('mobile-group-invitation-count');
+                    if (data.group_invitations > 0) {
+                        if (groupInvitationCount) {
+                            groupInvitationCount.textContent = data.group_invitations;
+                            groupInvitationCount.classList.remove('hidden');
+                        }
+                        if (mobileGroupInvitationCount) {
+                            mobileGroupInvitationCount.textContent = data.group_invitations;
+                            mobileGroupInvitationCount.classList.remove('hidden');
+                        }
+                    } else {
+                        if (groupInvitationCount) groupInvitationCount.classList.add('hidden');
+                        if (mobileGroupInvitationCount) mobileGroupInvitationCount.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading notification counts:', error);
+                });
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+            
+            if (menu && menuIcon && closeIcon) {
+                if (menu.classList.contains('hidden')) {
+                    menu.classList.remove('hidden');
+                    menu.classList.add('animate-slideDown');
+                    menuIcon.classList.add('hidden');
+                    closeIcon.classList.remove('hidden');
+                } else {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('animate-slideDown');
+                    menuIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                }
+                feather.replace();
+            }
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('mobile-menu');
+            const button = document.getElementById('mobile-menu-button');
+            if (menu && button && !menu.contains(e.target) && !button.contains(e.target) && !menu.classList.contains('hidden')) {
+                toggleMobileMenu();
+            }
+        });
+
+        // Load counts on page load and refresh every 30 seconds
+        loadNotificationCounts();
+        setInterval(loadNotificationCounts, 30000);
+        {% endif %}
+    </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+</body>
+</html>

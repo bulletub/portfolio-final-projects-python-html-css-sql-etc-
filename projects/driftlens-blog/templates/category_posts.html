@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{{ category.title() }} Posts | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+    .category-photography { background-color: #11698E; }
+    .category-travel { background-color: #19456B; }
+    .category-adventure { background-color: #16C79A; }
+    .blog-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+<link href="/static/css/styles.css" rel="stylesheet"/>
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}" title="Messages">
+<i data-feather="message-circle" class="w-5 h-5"></i>
+<span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}" title="Groups">
+<i data-feather="users" class="w-5 h-5"></i>
+<span id="group-invitation-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}" title="Notifications">
+<i data-feather="bell" class="w-5 h-5"></i>
+<span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium" href="{{ url_for('profile') }}" title="Profile">
+<i data-feather="user" class="w-5 h-5"></i>
+</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">
+Logout
+</a>
+</div>
+<!-- Mobile menu button -->
+<div class="md:hidden flex items-center space-x-2">
+<button class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 relative" onclick="openModal('submitContent')" title="Create Post">
+<i data-feather="plus" class="w-5 h-5"></i>
+</button>
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+<i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='photography') }}">
+<i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='travel') }}">
+<i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='adventure') }}">
+<i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('messages') }}">
+<i data-feather="message-circle" class="w-4 h-4 inline mr-2"></i>Messages
+<span id="mobile-message-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('groups') }}">
+<i data-feather="users" class="w-4 h-4 inline mr-2"></i>Groups
+<span id="mobile-group-invitation-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('notifications') }}">
+<i data-feather="bell" class="w-4 h-4 inline mr-2"></i>Notifications
+<span id="mobile-notification-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('profile') }}">
+<i data-feather="user" class="w-4 h-4 inline mr-2"></i>Profile
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-red-500 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 text-center" href="{{ url_for('logout') }}">
+<i data-feather="log-out" class="w-4 h-4 inline mr-2"></i>Logout
+</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Category Header -->
+<section class="hero-gradient text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h1 class="text-4xl md:text-5xl font-bold title-font mb-4">{{ category.title() }} Posts</h1>
+<p class="text-lg md:text-xl opacity-90">{{ posts|length }} posts in this category</p>
+<div class="mt-6">
+<a class="inline-flex items-center px-6 py-3 border-2 border-white text-white rounded-md text-lg font-medium hover:bg-white hover:text-blue-600 transition duration-300" href="{{ url_for('index') }}">
+<i class="mr-2 w-5 h-5" data-feather="arrow-left"></i>
+Back to Home
+</a>
+</div>
+</div>
+</section>
+
+<!-- Posts Grid -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+{% if posts %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+{% for post in posts %}
+<div class="post-item bg-white rounded-lg overflow-hidden shadow-md blog-card transition duration-300" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+<div class="relative">
+{% if post.file_path and post.content_type == 'image' %}
+<img alt="{{ post.title }}" class="w-full h-48 object-cover" src="{{ url_for('uploaded_file', filename=post.file_path) }}"/>
+{% elif post.file_path and post.content_type == 'video' %}
+<video class="w-full h-48 object-cover" controls>
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+{% elif post.file_path and post.content_type == 'audio' %}
+<div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+<audio controls class="w-full">
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+</div>
+{% else %}
+<img alt="{{ post.title }}" class="w-full h-48 object-cover bg-gray-200" src="http://static.photos/{{ post.category }}/640x360/{{ loop.index }}"/>
+{% endif %}
+<span class="absolute top-4 right-4 bg-white text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">{{ post.category.title() }}</span>
+</div>
+<div class="p-6">
+<div class="flex items-center text-sm text-gray-500 mb-2">
+<span>{{ post.views }} views</span>
+<span class="mx-2">•</span>
+<span>{{ post.likes }} likes</span>
+<span class="mx-2">•</span>
+                <span>{{ post.created_at|philippine_time('%B %d, %Y') }}</span>
+</div>
+<h3 class="text-xl font-bold mb-3">{{ post.title }}</h3>
+<p class="text-gray-600 mb-4">{{ post.description[:100] }}{% if post.description|length > 100 %}...{% endif %}</p>
+<div class="flex items-center justify-between">
+<a class="text-blue-600 font-medium flex items-center hover:text-blue-800" href="{{ url_for('view_post', post_id=post.id) }}">
+                                Read More
+                                <i class="ml-2 w-4 h-4" data-feather="arrow-right"></i>
+</a>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full mr-2 bg-gray-300 flex items-center justify-center">
+<span class="text-xs font-semibold text-gray-600">{{ post.user.email[0].upper() }}</span>
+</div>
+<span class="text-sm text-gray-600">{{ post.user.email.split('@')[0] }}</span>
+</div>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-16">
+<div class="max-w-md mx-auto">
+<i class="w-16 h-16 text-gray-400 mx-auto mb-4" data-feather="image"></i>
+<h3 class="text-xl font-semibold text-gray-600 mb-2">No {{ category.title() }} Posts Yet</h3>
+<p class="text-gray-500 mb-6">Be the first to share a {{ category }} post!</p>
+<button class="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700" onclick="openModal('submitContent')">
+Share Your {{ category.title() }} Content
+</button>
+</div>
+</div>
+{% endif %}
+</div>
+</section>
+
+<!-- Content Submission Modal -->
+<div class="fixed inset-0 hidden items-center justify-center modal-bg z-50" id="submitModal">
+<div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-8 relative max-h-screen overflow-y-auto">
+<button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" onclick="closeModal()">
+<i data-feather="x"></i>
+</button>
+<div id="submitContentForm">
+<h2 class="text-2xl font-bold mb-6 text-center">Share Your Content</h2>
+<form action="{{ url_for('create_post') }}" enctype="multipart/form-data" method="POST">
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Title</label>
+<input class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" name="title" placeholder="Give your content a title" required="" type="text"/>
+</div>
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Description</label>
+<textarea class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" name="description" placeholder="Tell us about your content" required="" rows="4"></textarea>
+</div>
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Category</label>
+<div class="grid grid-cols-3 gap-4">
+<div>
+<input class="hidden peer" id="photographyCat" name="category" required="" type="radio" value="photography"/>
+<label class="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="photographyCat">
+<i class="w-8 h-8 mb-2 text-blue-600" data-feather="camera"></i>
+<span>Photography</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="travelCat" name="category" type="radio" value="travel"/>
+<label class="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="travelCat">
+<i class="w-8 h-8 mb-2 text-blue-600" data-feather="map"></i>
+<span>Travel</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="adventureCat" name="category" type="radio" value="adventure"/>
+<label class="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="adventureCat">
+<i class="w-8 h-8 mb-2 text-blue-600" data-feather="compass"></i>
+<span>Adventure</span>
+</label>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Content Type</label>
+<div class="grid grid-cols-3 gap-4">
+<div>
+<input class="hidden peer" id="imageType" name="contentType" required="" type="radio" value="image"/>
+<label class="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="imageType">
+<i class="w-8 h-8 mb-2 text-blue-600" data-feather="image"></i>
+<span>Image</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="videoType" name="contentType" type="radio" value="video"/>
+<label class="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="videoType">
+<i class="w-8 h-8 mb-2 text-blue-600" data-feather="video"></i>
+<span>Video</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="audioType" name="contentType" type="radio" value="audio"/>
+<label class="flex flex-col items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="audioType">
+<i class="w-8 h-8 mb-2 text-blue-600" data-feather="mic"></i>
+<span>Audio</span>
+</label>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Upload File</label>
+<input accept="image/*,video/*,audio/*" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" name="file" required="" type="file"/>
+</div>
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Tags (optional)</label>
+<input class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" name="tags" placeholder="Add tags separated by commas" type="text"/>
+</div>
+<div class="flex justify-end">
+<button class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md font-medium mr-4 hover:bg-gray-50" onclick="closeModal()" type="button">Cancel</button>
+<button class="px-6 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700" type="submit">Submit</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+
+    function openModal(type) {
+      if (type === 'submitContent') {
+        document.getElementById('submitModal').classList.remove('hidden');
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('submitModal').classList.add('hidden');
+    }
+
+    // Load notification counts
+    function loadNotificationCounts() {
+        fetch('/get_notification_counts')
+            .then(response => response.json())
+            .then(data => {
+                // Update desktop counts
+                const messageCount = document.getElementById('message-count');
+                const mobileMessageCount = document.getElementById('mobile-message-count');
+                if (data.messages > 0) {
+                    messageCount.textContent = data.messages;
+                    messageCount.classList.remove('hidden');
+                    if (mobileMessageCount) {
+                        mobileMessageCount.textContent = data.messages;
+                        mobileMessageCount.classList.remove('hidden');
+                    }
+                } else {
+                    messageCount.classList.add('hidden');
+                    if (mobileMessageCount) mobileMessageCount.classList.add('hidden');
+                }
+                
+                const notificationCount = document.getElementById('notification-count');
+                const mobileNotificationCount = document.getElementById('mobile-notification-count');
+                if (data.notifications > 0) {
+                    notificationCount.textContent = data.notifications;
+                    notificationCount.classList.remove('hidden');
+                    if (mobileNotificationCount) {
+                        mobileNotificationCount.textContent = data.notifications;
+                        mobileNotificationCount.classList.remove('hidden');
+                    }
+                } else {
+                    notificationCount.classList.add('hidden');
+                    if (mobileNotificationCount) mobileNotificationCount.classList.add('hidden');
+                }
+                
+                const groupInvitationCount = document.getElementById('group-invitation-count');
+                const mobileGroupInvitationCount = document.getElementById('mobile-group-invitation-count');
+                if (data.group_invitations > 0) {
+                    groupInvitationCount.textContent = data.group_invitations;
+                    groupInvitationCount.classList.remove('hidden');
+                    if (mobileGroupInvitationCount) {
+                        mobileGroupInvitationCount.textContent = data.group_invitations;
+                        mobileGroupInvitationCount.classList.remove('hidden');
+                    }
+                } else {
+                    groupInvitationCount.classList.add('hidden');
+                    if (mobileGroupInvitationCount) mobileGroupInvitationCount.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notification counts:', error);
+            });
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            menu.classList.add('animate-slideDown');
+            menuIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+        } else {
+            menu.classList.add('hidden');
+            menu.classList.remove('animate-slideDown');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+        feather.replace();
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('mobile-menu');
+        const button = document.getElementById('mobile-menu-button');
+        if (!menu.contains(e.target) && !button.contains(e.target) && !menu.classList.contains('hidden')) {
+            toggleMobileMenu();
+        }
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+    loadNotificationCounts();
+    setInterval(loadNotificationCounts, 30000);
+  });
+</script>
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+</body>
+</html>

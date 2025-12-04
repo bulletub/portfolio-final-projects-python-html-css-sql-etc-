@@ -1,12 +1,28 @@
 {
   "projects": [
     {
-      "title": "Example Project",
-      "description": "This is an example project. Replace this with your actual projects.",
-      "technologies": ["HTML", "CSS", "JavaScript"],
-      "githubUrl": "https://github.com/yourusername/example-project",
-      "liveUrl": "https://example-project.com"
+      "title": "Sandwich Spread",
+      "description": "A modern mobile e-commerce application built with Angular and Ionic. Features product browsing, shopping cart, checkout, order management, and admin dashboard. Fully responsive design optimized for mobile devices.",
+      "technologies": ["Angular", "Ionic", "TypeScript", "Capacitor", "CSS3"],
+      "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
+      "liveUrl": "projects/sandwich-spread/index.html",
+      "category": "Mobile App"
+    },
+    {
+      "title": "Weather Analyzer",
+      "description": "A comprehensive real-time weather analysis dashboard with interactive maps, live weather updates, advanced analytics, and data export capabilities. Features trend analysis, distribution charts, and automatic weather alerts.",
+      "technologies": ["Python", "Flask", "Open-Meteo API", "Leaflet.js", "Matplotlib", "HTML5", "CSS3", "JavaScript"],
+      "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
+      "liveUrl": "https://weather-analyzer.onrender.com",
+      "category": "Web Application"
+    },
+    {
+      "title": "DriftLens Blog",
+      "description": "A full-featured social blogging platform with user authentication, post creation, comments, likes, messaging, groups, notifications, and admin dashboard. Includes guest browsing, search functionality, and mobile-responsive design.",
+      "technologies": ["Python", "Flask", "SQLAlchemy", "SQLite", "Flask-Login", "Bcrypt", "HTML5", "CSS3", "JavaScript"],
+      "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
+      "liveUrl": "https://driftlens-blog.onrender.com",
+      "category": "Web Application"
     }
   ]
 }
-

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Groups | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+<link href="/static/css/styles.css" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}" title="Messages">
+<i data-feather="message-circle" class="w-5 h-5"></i>
+<span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}" title="Groups">
+<i data-feather="users" class="w-5 h-5"></i>
+<span id="group-invitation-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}" title="Notifications">
+<i data-feather="bell" class="w-5 h-5"></i>
+<span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium" href="{{ url_for('profile') }}" title="Profile">
+<i data-feather="user" class="w-5 h-5"></i>
+</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">
+Logout
+</a>
+</div>
+<!-- Mobile menu button -->
+<div class="md:hidden flex items-center space-x-2">
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+  <i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='photography') }}">
+  <i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='travel') }}">
+  <i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='adventure') }}">
+  <i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('messages') }}">
+  <i data-feather="message-circle" class="w-4 h-4 inline mr-2"></i>Messages
+  <span id="mobile-message-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-blue-600 bg-gray-100 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('groups') }}">
+  <i data-feather="users" class="w-4 h-4 inline mr-2"></i>Groups
+  <span id="mobile-group-invitation-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('notifications') }}">
+  <i data-feather="bell" class="w-4 h-4 inline mr-2"></i>Notifications
+  <span id="mobile-notification-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('profile') }}">
+  <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Profile
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-red-500 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 text-center" href="{{ url_for('logout') }}">
+  <i data-feather="log-out" class="w-4 h-4 inline mr-2"></i>Logout
+</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Header -->
+<section class="hero-gradient text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h1 class="text-4xl md:text-5xl font-bold title-font mb-4">Groups</h1>
+<p class="text-lg md:text-xl opacity-90">Join communities and share your experiences with like-minded people</p>
+<div class="mt-6">
+<a href="{{ url_for('create_group') }}" class="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-md text-lg font-medium hover:bg-gray-100 transition duration-300">
+<i class="w-5 h-5 mr-2" data-feather="plus"></i>
+Create Group
+</a>
+</div>
+</div>
+</section>
+
+<!-- My Groups Section -->
+<section class="py-8 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-2xl font-bold title-font mb-6">My Groups</h2>
+{% if groups %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+{% for group in groups %}
+<div class="bg-white rounded-lg overflow-hidden shadow-lg border hover:shadow-xl transition duration-300" data-aos="fade-up">
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-gray-800">{{ group.name }}</h3>
+{% if group.is_private %}
+<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">Private</span>
+{% else %}
+<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">Public</span>
+{% endif %}
+</div>
+<p class="text-gray-600 mb-4">{{ group.description or 'No description provided' }}</p>
+<div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+<span>{{ group.members.count() }} members</span>
+                <span>Created {{ group.created_at|philippine_time('%B %d, %Y') }}</span>
+</div>
+<div class="flex space-x-2">
+<a href="{{ url_for('group_detail', group_id=group.id) }}" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md text-center hover:bg-blue-700 transition duration-300">
+View Group
+</a>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-16">
+<div class="max-w-md mx-auto">
+<i class="w-16 h-16 text-gray-400 mx-auto mb-4" data-feather="users"></i>
+<h3 class="text-xl font-semibold text-gray-600 mb-2">No Groups Yet</h3>
+<p class="text-gray-500 mb-6">You haven't joined any groups yet. Create one or browse public groups below!</p>
+<a href="{{ url_for('create_group') }}" class="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700">
+Create Your First Group
+</a>
+</div>
+</div>
+{% endif %}
+</div>
+</section>
+
+<!-- Public Groups Section -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-2xl font-bold title-font mb-6">Public Groups</h2>
+{% if public_groups %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+{% for group in public_groups %}
+{% set is_member = group.members.filter_by(user_id=current_user.id).first() %}
+<div class="bg-white rounded-lg overflow-hidden shadow-lg border hover:shadow-xl transition duration-300" data-aos="fade-up">
+<div class="p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-gray-800">{{ group.name }}</h3>
+<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">Public</span>
+</div>
+<p class="text-gray-600 mb-4">{{ group.description or 'No description provided' }}</p>
+<div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+<span>{{ group.members.count() }} members</span>
+                <span>Created {{ group.created_at|philippine_time('%B %d, %Y') }}</span>
+</div>
+<div class="flex space-x-2">
+{% if is_member %}
+<a href="{{ url_for('group_detail', group_id=group.id) }}" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md text-center hover:bg-blue-700 transition duration-300">
+View Group
+</a>
+{% else %}
+<a href="{{ url_for('group_preview', group_id=group.id) }}" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-md text-center hover:bg-green-700 transition duration-300">
+Preview Group
+</a>
+{% endif %}
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-8">
+<p class="text-gray-500">No public groups available at the moment.</p>
+</div>
+{% endif %}
+</div>
+</section>
+
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+
+    // Load notification counts
+    function loadNotificationCounts() {
+        fetch('/get_notification_counts')
+            .then(response => response.json())
+            .then(data => {
+                // Update desktop message count
+                const messageCount = document.getElementById('message-count');
+                const mobileMessageCount = document.getElementById('mobile-message-count');
+                if (data.messages > 0) {
+                    messageCount.textContent = data.messages;
+                    messageCount.classList.remove('hidden');
+                    if (mobileMessageCount) {
+                        mobileMessageCount.textContent = data.messages;
+                        mobileMessageCount.classList.remove('hidden');
+                    }
+                } else {
+                    messageCount.classList.add('hidden');
+                    if (mobileMessageCount) mobileMessageCount.classList.add('hidden');
+                }
+                
+                // Update notification count
+                const notificationCount = document.getElementById('notification-count');
+                const mobileNotificationCount = document.getElementById('mobile-notification-count');
+                if (data.notifications > 0) {
+                    notificationCount.textContent = data.notifications;
+                    notificationCount.classList.remove('hidden');
+                    if (mobileNotificationCount) {
+                        mobileNotificationCount.textContent = data.notifications;
+                        mobileNotificationCount.classList.remove('hidden');
+                    }
+                } else {
+                    notificationCount.classList.add('hidden');
+                    if (mobileNotificationCount) mobileNotificationCount.classList.add('hidden');
+                }
+                
+                // Update group invitation count
+                const groupInvitationCount = document.getElementById('group-invitation-count');
+                const mobileGroupInvitationCount = document.getElementById('mobile-group-invitation-count');
+                if (data.group_invitations > 0) {
+                    groupInvitationCount.textContent = data.group_invitations;
+                    groupInvitationCount.classList.remove('hidden');
+                    if (mobileGroupInvitationCount) {
+                        mobileGroupInvitationCount.textContent = data.group_invitations;
+                        mobileGroupInvitationCount.classList.remove('hidden');
+                    }
+                } else {
+                    groupInvitationCount.classList.add('hidden');
+                    if (mobileGroupInvitationCount) mobileGroupInvitationCount.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notification counts:', error);
+            });
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            menu.classList.add('animate-slideDown');
+            menuIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+        } else {
+            menu.classList.add('hidden');
+            menu.classList.remove('animate-slideDown');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+        feather.replace();
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('mobile-menu');
+        const button = document.getElementById('mobile-menu-button');
+        if (!menu.contains(e.target) && !button.contains(e.target) && !menu.classList.contains('hidden')) {
+            toggleMobileMenu();
+        }
+    });
+
+    // Load group invitations
+    function loadGroupInvitations() {
+        // This would typically load pending group invitations
+        // For now, we'll show a placeholder
+        const groupInvitationsEl = document.getElementById('groupInvitations');
+        if (groupInvitationsEl) {
+            groupInvitationsEl.innerHTML = '<p class="text-gray-500">No pending group invitations</p>';
+        }
+    }
+
+    // Load invitations on page load and refresh counts every 30 seconds
+    if (typeof loadGroupInvitations === 'function') loadGroupInvitations();
+    loadNotificationCounts();
+    setInterval(loadNotificationCounts, 30000);
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+</body>
+</html>

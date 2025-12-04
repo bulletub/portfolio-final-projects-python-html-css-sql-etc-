@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DriftLens | Photography, Travel &amp; Adventure Blog</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<!-- Inline CSS -->
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #F8F1F1;
+    }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+    .category-photography { background-color: #11698E; }
+    .category-travel { background-color: #19456B; }
+    .category-adventure { background-color: #16C79A; }
+    .blog-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),
+                  0 10px 10px -5px rgba(0,0,0,0.04);
+    }
+    .footer-bg { background-color: #19456B; }
+    .modal-bg {
+      background: rgba(0,0,0,0.6);
+    }
+    .file-upload {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .file-upload:hover {
+      border-color: #11698E;
+      background-color: #f0f8ff;
+    }
+    .preview-container {
+      display: none;
+      margin-top: 15px;
+    }
+    .preview-image {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+    }
+    .preview-video {
+      width: 100%;
+      border-radius: 8px;
+    }
+  </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+<link href="/static/css/styles.css" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}" title="Messages">
+<i data-feather="message-circle" class="w-5 h-5"></i>
+<span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}" title="Groups">
+<i data-feather="users" class="w-5 h-5"></i>
+<span id="group-invitation-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}" title="Notifications">
+<i data-feather="bell" class="w-5 h-5"></i>
+<span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium" href="{{ url_for('profile') }}" title="Profile">
+<i data-feather="user" class="w-5 h-5"></i>
+</a>
+<button class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700" onclick="openModal('submitContent')">
+<i data-feather="plus" class="w-4 h-4 inline mr-1"></i>
+Submit
+</button>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">
+Logout
+</a>
+</div>
+<div class="md:hidden flex items-center space-x-2">
+<button class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 relative" onclick="openModal('submitContent')" title="Create Post">
+<i data-feather="plus" class="w-5 h-5"></i>
+</button>
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+  <i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='photography') }}">
+  <i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='travel') }}">
+  <i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='adventure') }}">
+  <i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('messages') }}">
+  <i data-feather="message-circle" class="w-4 h-4 inline mr-2"></i>Messages
+  <span id="mobile-message-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('groups') }}">
+  <i data-feather="users" class="w-4 h-4 inline mr-2"></i>Groups
+  <span id="mobile-group-invitation-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('notifications') }}">
+  <i data-feather="bell" class="w-4 h-4 inline mr-2"></i>Notifications
+  <span id="mobile-notification-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('profile') }}">
+  <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Profile
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-red-500 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 text-center" href="{{ url_for('logout') }}">
+  <i data-feather="log-out" class="w-4 h-4 inline mr-2"></i>Logout
+</a>
+</div>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="hero-gradient text-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+<div class="md:flex md:items-center md:justify-between">
+<div class="md:w-1/2" data-aos="fade-right">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold title-font mb-6">
+            Capture the World Through Our Lens
+          </h1>
+<p class="text-lg md:text-xl mb-8 opacity-90">
+            Discover breathtaking photography, travel guides, and thrilling adventures from around the globe.
+          </p>
+<!-- Search Bar -->
+<div class="mb-6">
+<form action="{{ url_for('search') }}" method="GET" class="flex max-w-md w-full">
+<input type="text" name="q" placeholder="Search users, posts, groups..." class="flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-l-lg text-gray-800 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500" value="{{ request.args.get('q', '') }}">
+<button type="submit" class="px-3 sm:px-4 py-2 sm:py-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition duration-300">
+<i class="w-4 h-4 sm:w-5 sm:h-5" data-feather="search"></i>
+</button>
+</form>
+</div>
+
+<div class="flex space-x-4">
+<a class="bg-white text-blue-600 px-6 py-3 rounded-md text-lg font-medium hover:bg-gray-100 transition duration-300" href="{{ url_for('explore') }}">
+  <i data-feather="compass" class="inline-block w-5 h-5 mr-2"></i>
+  Explore
+</a>
+<button class="border-2 border-white text-white px-6 py-3 rounded-md text-lg font-medium hover:bg-white hover:text-blue-600 transition duration-300" onclick="openModal('submitContent')">
+  <i data-feather="edit" class="inline-block w-5 h-5 mr-2"></i>
+  Share Your Story
+</button>
+</div>
+</div>
+<div class="hidden md:block md:w-1/2" data-aos="fade-left">
+<img alt="Travel" class="rounded-lg shadow-xl" src="http://static.photos/travel/1024x576/1"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Content Submission Modal -->
+<div class="fixed inset-0 z-50 hidden" id="submitModal" style="background-color: rgba(0, 0, 0, 0.5);">
+<div class="flex items-center justify-center min-h-screen px-4">
+<div class="bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 relative max-h-[85vh] overflow-y-auto">
+<button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" onclick="closeModal()">
+<i data-feather="x"></i>
+</button>
+<div id="submitContentForm">
+<h2 class="text-xl font-bold mb-4 text-center">Share Your Content</h2>
+<!-- ✅ Updated Form -->
+<form action="{{ url_for('create_post') }}" enctype="multipart/form-data" method="POST">
+<!-- Title -->
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-1 text-sm">Title</label>
+<input class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" name="title" placeholder="Give your content a title" required="" type="text"/>
+</div>
+<!-- Description -->
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-1 text-sm">Description</label>
+<textarea class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" name="description" placeholder="Tell us about your content" required="" rows="3"></textarea>
+</div>
+<!-- Category -->
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-1 text-sm">Category</label>
+<div class="grid grid-cols-3 gap-2">
+<div>
+<input class="hidden peer" id="photographyCat" name="category" required="" type="radio" value="photography"/>
+<label class="flex flex-col items-center justify-center p-2 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="photographyCat">
+<i class="w-6 h-6 mb-1 text-blue-600" data-feather="camera"></i>
+<span class="text-xs">Photography</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="travelCat" name="category" type="radio" value="travel"/>
+<label class="flex flex-col items-center justify-center p-2 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="travelCat">
+<i class="w-6 h-6 mb-1 text-blue-600" data-feather="map"></i>
+<span class="text-xs">Travel</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="adventureCat" name="category" type="radio" value="adventure"/>
+<label class="flex flex-col items-center justify-center p-2 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="adventureCat">
+<i class="w-6 h-6 mb-1 text-blue-600" data-feather="compass"></i>
+<span class="text-xs">Adventure</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Content Type -->
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-1 text-sm">Content Type</label>
+<div class="grid grid-cols-3 gap-2">
+<div>
+<input class="hidden peer" id="imageType" name="contentType" required="" type="radio" value="image"/>
+<label class="flex flex-col items-center justify-center p-2 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="imageType">
+<i class="w-6 h-6 mb-1 text-blue-600" data-feather="image"></i>
+<span class="text-xs">Image</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="videoType" name="contentType" type="radio" value="video"/>
+<label class="flex flex-col items-center justify-center p-2 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="videoType">
+<i class="w-6 h-6 mb-1 text-blue-600" data-feather="video"></i>
+<span class="text-xs">Video</span>
+</label>
+</div>
+<div>
+<input class="hidden peer" id="audioType" name="contentType" type="radio" value="audio"/>
+<label class="flex flex-col items-center justify-center p-2 border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:bg-blue-50" for="audioType">
+<i class="w-6 h-6 mb-1 text-blue-600" data-feather="mic"></i>
+<span class="text-xs">Audio</span>
+</label>
+</div>
+</div>
+</div>
+<!-- File Upload -->
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-1 text-sm">Upload File</label>
+<input accept="image/*,video/*,audio/*" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" name="file" required="" type="file"/>
+</div>
+<!-- Tags -->
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-1 text-sm">Tags (optional)</label>
+<input class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" name="tags" placeholder="Add tags separated by commas" type="text"/>
+</div>
+<!-- Submit -->
+<div class="flex justify-end gap-2">
+<button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50" onclick="closeModal()" type="button">Cancel</button>
+<button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700" type="submit">Submit</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<!-- Featured Posts Carousel -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-4">Featured Stories</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Our most popular and inspiring posts from all categories</p>
+</div>
+
+<!-- Carousel Container -->
+<div class="relative">
+<div class="carousel-container overflow-hidden">
+<div class="carousel-wrapper flex transition-transform duration-500 ease-in-out" id="featuredCarousel">
+{% for post in posts[:6] %}
+<div class="carousel-slide w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-4">
+<div class="bg-white rounded-lg overflow-hidden shadow-md blog-card transition duration-300" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+<div class="relative">
+{% if post.file_path and post.content_type == 'image' %}
+<img alt="{{ post.title }}" class="w-full h-48 object-cover" src="{{ url_for('uploaded_file', filename=post.file_path) }}"/>
+{% elif post.file_path and post.content_type == 'video' %}
+<video class="w-full h-48 object-cover" controls>
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+{% elif post.file_path and post.content_type == 'audio' %}
+<div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+<audio controls class="w-full">
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+</div>
+{% else %}
+<img alt="{{ post.title }}" class="w-full h-48 object-cover bg-gray-200" src="http://static.photos/{{ post.category }}/640x360/{{ loop.index }}"/>
+{% endif %}
+<span class="absolute top-4 right-4 bg-white text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">{{ post.category.title() }}</span>
+</div>
+<div class="p-6">
+<div class="flex items-center text-sm text-gray-500 mb-2">
+<span>{{ post.id }} views</span>
+<span class="mx-2">•</span>
+<span>{{ post.content_type.title() }}</span>
+</div>
+<h3 class="text-xl font-bold mb-3">{{ post.title }}</h3>
+<p class="text-gray-600 mb-4">{{ post.description[:100] }}{% if post.description|length > 100 %}...{% endif %}</p>
+<a class="text-blue-600 font-medium flex items-center hover:text-blue-800" href="{{ url_for('view_post', post_id=post.id) }}">
+                            Read More
+                            <i class="ml-2 w-4 h-4" data-feather="arrow-right"></i>
+</a>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+</div>
+
+<!-- Carousel Navigation -->
+<div class="flex justify-center mt-8 space-x-2">
+<button class="carousel-prev bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition duration-300" onclick="moveCarousel('featured', -1)">
+<i data-feather="chevron-left"></i>
+</button>
+<button class="carousel-next bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition duration-300" onclick="moveCarousel('featured', 1)">
+<i data-feather="chevron-right"></i>
+</button>
+</div>
+
+<!-- Carousel Indicators -->
+<div class="flex justify-center mt-4 space-x-2" id="featuredIndicators">
+<!-- Indicators will be generated by JavaScript -->
+</div>
+</div>
+</div>
+</section>
+<!-- Categories Section -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-4">Explore Our Categories</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Dive into our curated collections of stories and images</p>
+</div>
+<div class="grid md:grid-cols-3 gap-6">
+<!-- Photography Category -->
+<a class="category-photography rounded-lg overflow-hidden shadow-lg text-white" data-aos="zoom-in" href="{{ url_for('category_posts', category='photography') }}" id="photography">
+<div class="relative h-64">
+<img alt="Photography" class="w-full h-full object-cover opacity-80" src="http://static.photos/photography/640x360/2"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center p-6">
+<h3 class="text-2xl font-bold title-font mb-2">Photography</h3>
+<p class="opacity-90 mb-4">Stunning visual stories from around the world</p>
+<span class="inline-block px-4 py-2 bg-white text-blue-600 rounded-full text-sm font-semibold">View Collection</span>
+</div>
+</div>
+</div>
+</a>
+<!-- Travel Category -->
+<a class="category-travel rounded-lg overflow-hidden shadow-lg text-white" data-aos="zoom-in" data-aos-delay="100" href="{{ url_for('category_posts', category='travel') }}" id="travel">
+<div class="relative h-64">
+<img alt="Travel" class="w-full h-full object-cover opacity-80" src="http://static.photos/travel/640x360/3"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center p-6">
+<h3 class="text-2xl font-bold title-font mb-2">Travel</h3>
+<p class="opacity-90 mb-4">Guides, tips and personal experiences</p>
+<span class="inline-block px-4 py-2 bg-white text-blue-600 rounded-full text-sm font-semibold">View Collection</span>
+</div>
+</div>
+</div>
+</a>
+<!-- Adventure Category -->
+<a class="category-adventure rounded-lg overflow-hidden shadow-lg text-white" data-aos="zoom-in" data-aos-delay="200" href="{{ url_for('category_posts', category='adventure') }}" id="adventure">
+<div class="relative h-64">
+<img alt="Adventure" class="w-full h-full object-cover opacity-80" src="http://static.photos/adventure/640x360/4"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center p-6">
+<h3 class="text-2xl font-bold title-font mb-2">Adventure</h3>
+<p class="opacity-90 mb-4">Thrilling experiences and outdoor activities</p>
+<span class="inline-block px-4 py-2 bg-white text-green-600 rounded-full text-sm font-semibold">View Collection</span>
+</div>
+</div>
+</div>
+</a>
+</div>
+</div>
+</section>
+<!-- Shared Posts Section -->
+{% if shared_posts %}
+<section class="py-12 bg-gray-100">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-2xl md:text-3xl font-bold title-font mb-8">Recently Shared Posts</h2>
+<div class="space-y-4">
+{% for shared in shared_posts[:5] %}
+<div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition duration-300" data-aos="fade-up">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+<span class="text-sm font-semibold text-blue-600">{{ shared.user.email[0].upper() }}</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm text-gray-600 mb-2">
+<a href="{{ url_for('view_user_profile', user_id=shared.user.id) }}" class="font-semibold text-gray-800 hover:text-blue-600">{{ shared.user.email.split('@')[0] }}</a>
+shared a post
+                <span class="text-gray-500">• {{ shared.created_at|philippine_time('%B %d, %Y') }}</span>
+</p>
+<div class="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50 rounded">
+<h3 class="text-lg font-semibold text-gray-800 mb-1">{{ shared.post.title }}</h3>
+<p class="text-sm text-gray-600 mb-2">{{ shared.post.description[:100] }}{% if shared.post.description|length > 100 %}...{% endif %}</p>
+<a href="{{ url_for('view_post', post_id=shared.post.id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Post →</a>
+</div>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+</div>
+</section>
+{% endif %}
+
+<!-- Latest Posts -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col md:flex-row justify-between items-center mb-12">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">Latest Posts</h2>
+<p class="text-gray-600">Stay updated with our newest content</p>
+</div>
+<div class="mt-4 md:mt-0">
+<div class="flex items-center space-x-2">
+<button class="category-filter px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium" data-category="all" onclick="filterPosts('all')">All</button>
+<button class="category-filter px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300" data-category="photography" onclick="filterPosts('photography')">Photography</button>
+<button class="category-filter px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300" data-category="travel" onclick="filterPosts('travel')">Travel</button>
+<button class="category-filter px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300" data-category="adventure" onclick="filterPosts('adventure')">Adventure</button>
+</div>
+</div>
+</div>
+
+<!-- Posts Grid -->
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="postsGrid" data-total-posts="{{ posts|length or 0 }}">
+{% for post in posts %}
+<div class="post-item bg-white rounded-lg overflow-hidden shadow-md blog-card transition duration-300" data-category="{{ post.category }}" data-aos="fade-up" data-aos-delay="{{ loop.index0 * 100 }}">
+<div class="relative">
+{% if post.file_path and post.content_type == 'image' %}
+<img alt="{{ post.title }}" class="w-full h-48 object-cover" src="{{ url_for('uploaded_file', filename=post.file_path) }}"/>
+{% elif post.file_path and post.content_type == 'video' %}
+<video class="w-full h-48 object-cover" controls>
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+{% elif post.file_path and post.content_type == 'audio' %}
+<div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+<audio controls class="w-full">
+<source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+</div>
+{% else %}
+<img alt="{{ post.title }}" class="w-full h-48 object-cover bg-gray-200" src="http://static.photos/{{ post.category }}/640x360/{{ loop.index }}"/>
+{% endif %}
+<span class="absolute top-4 right-4 bg-white text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">{{ post.category.title() }}</span>
+</div>
+<div class="p-6">
+<div class="flex items-center text-sm text-gray-500 mb-2">
+<span>{{ post.views }} views</span>
+<span class="mx-2">•</span>
+<span>{{ post.likes }} likes</span>
+<span class="mx-2">•</span>
+<span>{{ post.content_type.title() }}</span>
+</div>
+<h3 class="text-xl font-bold mb-3">{{ post.title }}</h3>
+<p class="text-gray-600 mb-4">{{ post.description[:100] }}{% if post.description|length > 100 %}...{% endif %}</p>
+<div class="flex items-center justify-between">
+<a class="text-blue-600 font-medium flex items-center hover:text-blue-800" href="{{ url_for('view_post', post_id=post.id) }}">
+                                Read More
+                                <i class="ml-2 w-4 h-4" data-feather="arrow-right"></i>
+</a>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full mr-2 bg-gray-300 flex items-center justify-center">
+<span class="text-xs font-semibold text-gray-600">{{ post.user.email[0].upper() }}</span>
+</div>
+<span class="text-sm text-gray-600">{{ post.user.email.split('@')[0] }}</span>
+</div>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+
+<div class="text-center mt-12">
+<button class="inline-flex items-center px-6 py-3 border border-gray-300 text-lg font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-300" onclick="loadMorePosts()">
+                    Load More
+                    <i class="ml-2 w-5 h-5" data-feather="refresh-cw"></i>
+</button>
+</div>
+</div>
+</section>
+<!-- Scripts -->
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+
+    // Carousel functionality
+    let currentSlide = 0;
+    const slidesPerView = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1;
+    const totalPosts = parseInt(document.getElementById('postsGrid').dataset.totalPosts || '0');
+    const totalSlides = Math.ceil(totalPosts / slidesPerView);
+
+    function moveCarousel(carouselType, direction) {
+      const carousel = document.getElementById(carouselType + 'Carousel');
+      const indicators = document.querySelectorAll('#' + carouselType + 'Indicators .carousel-indicator');
+      
+      if (direction === 1) {
+        currentSlide = (currentSlide + 1) % totalSlides;
+      } else {
+        currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1;
+      }
+      
+      const translateX = -currentSlide * (100 / slidesPerView);
+      carousel.style.transform = `translateX(${translateX}%)`;
+      
+      // Update indicators
+      indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('bg-blue-600', index === currentSlide);
+        indicator.classList.toggle('bg-gray-300', index !== currentSlide);
+      });
+    }
+
+    function goToSlide(carouselType, slideIndex) {
+      currentSlide = slideIndex;
+      const carousel = document.getElementById(carouselType + 'Carousel');
+      const indicators = document.querySelectorAll('#' + carouselType + 'Indicators .carousel-indicator');
+      
+      const translateX = -currentSlide * (100 / slidesPerView);
+      carousel.style.transform = `translateX(${translateX}%)`;
+      
+      // Update indicators
+      indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('bg-blue-600', index === currentSlide);
+        indicator.classList.toggle('bg-gray-300', index !== currentSlide);
+      });
+    }
+
+    // Category filtering
+    function filterPosts(category) {
+      const posts = document.querySelectorAll('.post-item');
+      const filterButtons = document.querySelectorAll('.category-filter');
+      
+      // Update button styles
+      filterButtons.forEach(button => {
+        if (button.dataset.category === category) {
+          button.classList.remove('bg-gray-200', 'text-gray-700');
+          button.classList.add('bg-blue-600', 'text-white');
+        } else {
+          button.classList.remove('bg-blue-600', 'text-white');
+          button.classList.add('bg-gray-200', 'text-gray-700');
+        }
+      });
+      
+      // Filter posts
+      posts.forEach(post => {
+        if (category === 'all' || post.dataset.category === category) {
+          post.style.display = 'block';
+          post.style.animation = 'fadeIn 0.5s ease-in-out';
+        } else {
+          post.style.display = 'none';
+        }
+      });
+    }
+
+    // Load more posts functionality
+    function loadMorePosts() {
+      // This would typically make an AJAX request to load more posts
+      // For now, we'll just show an alert
+      alert('Load more functionality would be implemented here with AJAX requests to the backend.');
+    }
+
+    // Generate carousel indicators
+    function generateIndicators() {
+      const indicatorsContainer = document.getElementById('featuredIndicators');
+      indicatorsContainer.innerHTML = '';
+      
+      for (let i = 0; i < totalSlides; i++) {
+        const indicator = document.createElement('button');
+        indicator.className = `carousel-indicator w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition duration-300 ${i === 0 ? 'bg-blue-600' : ''}`;
+        indicator.onclick = () => goToSlide('featured', i);
+        indicatorsContainer.appendChild(indicator);
+      }
+    }
+
+    // Initialize indicators
+    generateIndicators();
+
+    // Auto-advance carousel
+    setInterval(() => {
+      moveCarousel('featured', 1);
+    }, 5000);
+
+    // Modal functions
+    function openModal(type) {
+      if (type === 'submitContent') {
+        document.getElementById('submitModal').classList.remove('hidden');
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('submitModal').classList.add('hidden');
+      resetContentForm();
+    }
+
+    // Content submission functions
+    function showFileInput(type) {
+      const fileUploadSection = document.getElementById('fileUploadSection');
+      const fileInput = document.getElementById('contentFile');
+      const fileTypes = document.getElementById('fileTypes');
+      
+      fileUploadSection.classList.remove('hidden');
+      
+      switch(type) {
+        case 'image':
+          fileInput.setAttribute('accept', 'image/*');
+          fileTypes.textContent = 'JPG, PNG, GIF';
+          break;
+        case 'video':
+          fileInput.setAttribute('accept', 'video/*');
+          fileTypes.textContent = 'MP4, MOV, AVI';
+          break;
+        case 'audio':
+          fileInput.setAttribute('accept', 'audio/*');
+          fileTypes.textContent = 'MP3, WAV, OGG';
+          break;
+      }
+      
+      // Reset preview
+      document.getElementById('previewContainer').style.display = 'none';
+      document.getElementById('previewContent').innerHTML = '';
+    }
+
+    document.getElementById('fileUpload').addEventListener('click', function() {
+      document.getElementById('contentFile').click();
+    });
+
+    document.getElementById('contentFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const previewContainer = document.getElementById('previewContainer');
+      const previewContent = document.getElementById('previewContent');
+      
+      previewContainer.style.display = 'block';
+      
+      const contentType = document.querySelector('input[name="contentType"]:checked').value;
+      
+      if (contentType === 'image') {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewContent.innerHTML = `<img src="${e.target.result}" class="preview-image" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+      } else if (contentType === 'video') {
+        const videoURL = URL.createObjectURL(file);
+        previewContent.innerHTML = `
+          <video controls class="preview-video">
+            <source src="${videoURL}" type="${file.type}">
+            Your browser does not support the video tag.
+          </video>
+        `;
+      } else if (contentType === 'audio') {
+        const audioURL = URL.createObjectURL(file);
+        previewContent.innerHTML = `
+          <audio controls class="w-full">
+            <source src="${audioURL}" type="${file.type}">
+            Your browser does not support the audio element.
+          </audio>
+        `;
+      }
+    });
+
+    function handleContentSubmission(e) {
+      e.preventDefault();
+      alert('Your content has been submitted for review!');
+      closeModal();
+    }
+
+    function resetContentForm() {
+      document.getElementById('contentForm').reset();
+      document.getElementById('fileUploadSection').classList.add('hidden');
+      document.getElementById('previewContainer').style.display = 'none';
+      document.getElementById('previewContent').innerHTML = '';
+    }
+
+    // Add CSS for fadeIn animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  // Load notification counts
+  function loadNotificationCounts() {
+    fetch('/get_notification_counts')
+      .then(response => response.json())
+      .then(data => {
+        // Update message count (desktop and mobile)
+        const messageCount = document.getElementById('message-count');
+        const mobileMessageCount = document.getElementById('mobile-message-count');
+        if (data.messages > 0) {
+          messageCount.textContent = data.messages;
+          messageCount.classList.remove('hidden');
+          if (mobileMessageCount) {
+            mobileMessageCount.textContent = data.messages;
+            mobileMessageCount.classList.remove('hidden');
+          }
+        } else {
+          messageCount.classList.add('hidden');
+          if (mobileMessageCount) mobileMessageCount.classList.add('hidden');
+        }
+        
+                // Update notification count (desktop and mobile)
+                const notificationCount = document.getElementById('notification-count');
+                const mobileNotificationCount = document.getElementById('mobile-notification-count');
+                if (data.notifications > 0) {
+                    notificationCount.textContent = data.notifications;
+                    notificationCount.classList.remove('hidden');
+                    if (mobileNotificationCount) {
+                        mobileNotificationCount.textContent = data.notifications;
+                        mobileNotificationCount.classList.remove('hidden');
+                    }
+                } else {
+                    notificationCount.classList.add('hidden');
+                    if (mobileNotificationCount) mobileNotificationCount.classList.add('hidden');
+                }
+                
+                // Update group invitation count (desktop and mobile)
+                const groupInvitationCount = document.getElementById('group-invitation-count');
+                const mobileGroupInvitationCount = document.getElementById('mobile-group-invitation-count');
+                if (data.group_invitations > 0) {
+                    groupInvitationCount.textContent = data.group_invitations;
+                    groupInvitationCount.classList.remove('hidden');
+                    if (mobileGroupInvitationCount) {
+                        mobileGroupInvitationCount.textContent = data.group_invitations;
+                        mobileGroupInvitationCount.classList.remove('hidden');
+                    }
+                } else {
+                    groupInvitationCount.classList.add('hidden');
+                    if (mobileGroupInvitationCount) mobileGroupInvitationCount.classList.add('hidden');
+                }
+      })
+      .catch(error => {
+        console.error('Error loading notification counts:', error);
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+    loadNotificationCounts();
+    
+    // Refresh counts every 30 seconds
+    setInterval(loadNotificationCounts, 30000);
+    
+    // Check for warning modal
+    {% if session.get('show_warning') %}
+    showWarningModal();
+    {% endif %}
+  });
+  
+  function showWarningModal() {
+    const modal = document.getElementById('warningModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+    }
+  }
+  
+  function dismissWarning() {
+    fetch('/dismiss_warning', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('warningModal').classList.add('hidden');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  }
+</script>
+
+<!-- Warning Modal -->
+{% if session.get('show_warning') %}
+<div id="warningModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 animate-fadeIn">
+    <div class="p-6">
+      <div class="flex items-center justify-center w-16 h-16 mx-auto bg-yellow-100 rounded-full mb-4">
+        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-center text-gray-900 mb-2">Account Warning</h3>
+      <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+        <p class="text-sm text-yellow-700">
+          <strong>Warning #{{ session.get('warning_count', 1) }}</strong>
+        </p>
+      </div>
+      <p class="text-gray-600 text-center mb-6">{{ session.get('warning_message', 'Please follow our community guidelines.') }}</p>
+      <div class="bg-gray-50 rounded-lg p-3 mb-4">
+        <p class="text-xs text-gray-500 text-center">
+          Multiple warnings may result in account suspension or permanent ban.
+        </p>
+      </div>
+      <div class="flex justify-center">
+        <button onclick="dismissWarning()" class="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition duration-300">
+          I Understand
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+</style>
+{% endif %}
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+</body>
+</html>

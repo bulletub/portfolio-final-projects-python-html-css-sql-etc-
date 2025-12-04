@@ -1,0 +1,76 @@
+/* Basic custom styles */
+body { background-color: #f8fafc; }
+.header-shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.post-card { transition: transform .15s ease-in-out; }
+.post-card:hover { transform: translateY(-4px); }
+
+/* Carousel styles */
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.carousel-wrapper {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  will-change: transform;
+}
+
+.carousel-slide {
+  flex: 0 0 auto;
+  padding: 0 0.5rem;
+}
+
+.carousel-prev,
+.carousel-next {
+  transition: all 0.3s ease;
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
+  transform: scale(1.05);
+}
+
+.carousel-indicator {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.carousel-indicator:hover {
+  transform: scale(1.2);
+}
+
+/* Post filtering animations */
+.post-item {
+  transition: all 0.3s ease;
+}
+
+.post-item.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+/* Responsive carousel adjustments */
+@media (max-width: 768px) {
+  .carousel-slide {
+    padding: 0 0.25rem;
+  }
+}
+
+/* Fade in animation for filtered posts */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}

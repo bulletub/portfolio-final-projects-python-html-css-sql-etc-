@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Explore | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+    .category-photography { background-color: #11698E; }
+    .category-travel { background-color: #19456B; }
+    .category-adventure { background-color: #16C79A; }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-5px); }
+</style>
+</head>
+<body class="text-gray-800">
+
+<!-- Navigation -->
+<nav class="bg-white shadow-sm sticky top-0 z-40">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('index') }}">
+  <i data-feather="home" class="inline-block w-4 h-4 mr-1"></i>
+  Home
+</a>
+<a class="text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('guest_explore') }}">
+  <i data-feather="compass" class="inline-block w-4 h-4 mr-1"></i>
+  Explore
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('guest_category_posts', category='photography') }}">
+  <i data-feather="camera" class="w-4 h-4 inline mr-1"></i>Photography
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('guest_category_posts', category='travel') }}">
+  <i data-feather="map" class="w-4 h-4 inline mr-1"></i>Travel
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('guest_category_posts', category='adventure') }}">
+  <i data-feather="compass" class="w-4 h-4 inline mr-1"></i>Adventure
+</a>
+<a class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700" href="{{ url_for('login') }}">
+  Login
+</a>
+<a class="border border-blue-600 text-blue-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50" href="{{ url_for('register') }}">
+  Sign Up
+</a>
+</div>
+<!-- Mobile menu button -->
+<div class="md:hidden flex items-center">
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+<i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-blue-600 bg-gray-100 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_explore') }}">
+<i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Explore
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_category_posts', category='photography') }}">
+<i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_category_posts', category='travel') }}">
+<i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_category_posts', category='adventure') }}">
+<i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-blue-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 text-center" href="{{ url_for('login') }}">
+Login
+</a>
+<a class="block border border-blue-600 text-blue-600 px-3 py-2 rounded-md text-base font-medium hover:bg-blue-50 text-center mt-2" href="{{ url_for('register') }}">
+Sign Up
+</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-gradient text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<div data-aos="fade-down">
+<i data-feather="compass" class="w-16 h-16 mx-auto mb-4"></i>
+<h1 class="text-4xl md:text-5xl font-bold title-font mb-4">Explore DriftLens</h1>
+<p class="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">Discover trending content, top creators, and amazing stories from our community</p>
+</div>
+</div>
+</section>
+
+<!-- Quick Stats -->
+<section class="py-12 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up">
+<i data-feather="trending-up" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ trending_posts|length }}</h3>
+<p class="text-sm opacity-90">Trending</p>
+</div>
+<div class="stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up" data-aos-delay="100">
+<i data-feather="users" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ top_creators|length }}</h3>
+<p class="text-sm opacity-90">Creators</p>
+</div>
+<div class="stat-card bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up" data-aos-delay="200">
+<i data-feather="layers" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ category_stats|length }}</h3>
+<p class="text-sm opacity-90">Categories</p>
+</div>
+<div class="stat-card bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up" data-aos-delay="300">
+<i data-feather="heart" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ popular_posts|length }}</h3>
+<p class="text-sm opacity-90">Popular</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Trending Posts -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-3xl font-bold title-font mb-8 text-center">🔥 Trending This Week</h2>
+{% if trending_posts %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {% for post in trending_posts %}
+  <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 cursor-pointer" data-aos="fade-up" onclick="showLoginModal()">
+    <div class="relative">
+      {% if post.content_type in ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'] %}
+        <img src="{{ url_for('uploaded_file', filename=post.file_path) }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+      {% else %}
+        <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500"></div>
+      {% endif %}
+      <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition duration-300 flex items-center justify-center">
+        <span class="opacity-0 hover:opacity-100 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">
+          <i data-feather="lock" class="w-4 h-4 inline mr-1"></i>Login to View
+        </span>
+      </div>
+    </div>
+    <div class="p-6">
+      <span class="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full mb-3 category-{{ post.category }}">
+        {{ post.category.title() }}
+      </span>
+      <h3 class="text-xl font-bold mb-2">{{ post.title }}</h3>
+      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.description[:80] }}...</p>
+      <div class="flex items-center justify-between text-sm text-gray-500">
+        <span class="flex items-center">
+          <i data-feather="eye" class="w-4 h-4 mr-1"></i>{{ post.views }}
+        </span>
+        <span class="flex items-center">
+          <i data-feather="heart" class="w-4 h-4 mr-1"></i>{{ post.likes }}
+        </span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="text-center text-gray-500">No trending posts yet. Check back soon!</p>
+{% endif %}
+</div>
+</section>
+
+<!-- Popular Posts -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-3xl font-bold title-font mb-8 text-center">⭐ Most Popular</h2>
+{% if popular_posts %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {% for post in popular_posts %}
+  <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 cursor-pointer" data-aos="fade-up" onclick="showLoginModal()">
+    <div class="relative">
+      {% if post.content_type in ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'] %}
+        <img src="{{ url_for('uploaded_file', filename=post.file_path) }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+      {% else %}
+        <div class="w-full h-48 bg-gradient-to-br from-purple-400 to-pink-500"></div>
+      {% endif %}
+      <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition duration-300 flex items-center justify-center">
+        <span class="opacity-0 hover:opacity-100 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">
+          <i data-feather="lock" class="w-4 h-4 inline mr-1"></i>Login to View
+        </span>
+      </div>
+    </div>
+    <div class="p-6">
+      <span class="inline-block px-3 py-1 text-xs font-semibold text-white rounded-full mb-3 category-{{ post.category }}">
+        {{ post.category.title() }}
+      </span>
+      <h3 class="text-xl font-bold mb-2">{{ post.title }}</h3>
+      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ post.description[:80] }}...</p>
+      <div class="flex items-center justify-between text-sm text-gray-500">
+        <span class="flex items-center">
+          <i data-feather="heart" class="w-4 h-4 mr-1"></i>{{ post.likes }} likes
+        </span>
+        <span class="flex items-center">
+          <i data-feather="message-circle" class="w-4 h-4 mr-1"></i>{{ post.comments.count() }}
+        </span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="text-center text-gray-500">No popular posts yet.</p>
+{% endif %}
+</div>
+</section>
+
+<!-- Categories -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<h2 class="text-3xl font-bold title-font mb-8 text-center">📂 Browse by Category</h2>
+<div class="grid md:grid-cols-3 gap-6">
+  <a href="{{ url_for('guest_category_posts', category='photography') }}" class="category-photography rounded-lg p-8 text-white text-center hover:shadow-xl transition duration-300" data-aos="zoom-in">
+    <i data-feather="camera" class="w-12 h-12 mx-auto mb-4"></i>
+    <h3 class="text-2xl font-bold mb-2">Photography</h3>
+    <p class="opacity-90 mb-4">Stunning visual stories</p>
+    <span class="inline-block px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-semibold">
+      Explore →
+    </span>
+  </a>
+  <a href="{{ url_for('guest_category_posts', category='travel') }}" class="category-travel rounded-lg p-8 text-white text-center hover:shadow-xl transition duration-300" data-aos="zoom-in" data-aos-delay="100">
+    <i data-feather="map" class="w-12 h-12 mx-auto mb-4"></i>
+    <h3 class="text-2xl font-bold mb-2">Travel</h3>
+    <p class="opacity-90 mb-4">Guides and experiences</p>
+    <span class="inline-block px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-semibold">
+      Explore →
+    </span>
+  </a>
+  <a href="{{ url_for('guest_category_posts', category='adventure') }}" class="category-adventure rounded-lg p-8 text-white text-center hover:shadow-xl transition duration-300" data-aos="zoom-in" data-aos-delay="200">
+    <i data-feather="compass" class="w-12 h-12 mx-auto mb-4"></i>
+    <h3 class="text-2xl font-bold mb-2">Adventure</h3>
+    <p class="opacity-90 mb-4">Thrilling experiences</p>
+    <span class="inline-block px-4 py-2 bg-white bg-opacity-20 rounded-full text-sm font-semibold">
+      Explore →
+    </span>
+  </a>
+</div>
+</div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
+  <h2 class="text-4xl font-bold title-font mb-4">Join the DriftLens Community</h2>
+  <p class="text-xl opacity-90 mb-8">Create an account to read full posts, like, comment, and share your own stories!</p>
+  <div class="flex justify-center space-x-4">
+    <a href="{{ url_for('register') }}" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition duration-300">
+      Sign Up Free
+    </a>
+    <a href="{{ url_for('login') }}" class="border-2 border-white text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-600 transition duration-300">
+      Login
+    </a>
+  </div>
+</div>
+</section>
+
+<!-- Login Modal -->
+<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-8" data-aos="zoom-in">
+    <div class="text-center">
+      <div class="flex items-center justify-center w-16 h-16 mx-auto bg-blue-100 rounded-full mb-4">
+        <i data-feather="lock" class="w-8 h-8 text-blue-600"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-4">Login Required</h3>
+      <p class="text-gray-600 mb-6">Please log in to view full posts and interact with the community.</p>
+      <div class="flex flex-col space-y-3">
+        <a href="{{ url_for('login') }}" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300">
+          Login
+        </a>
+        <a href="{{ url_for('register') }}" class="w-full border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition duration-300">
+          Create Account
+        </a>
+        <button onclick="closeLoginModal()" class="w-full text-gray-600 hover:text-gray-800 font-medium">
+          Continue Browsing
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <div>
+      <h3 class="text-lg font-bold title-font mb-4">DriftLens</h3>
+      <p class="text-gray-400 mb-4">Capturing the world through stories and lenses.</p>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-4">Categories</h3>
+      <ul class="space-y-2">
+        <li><a class="text-gray-400 hover:text-white" href="{{ url_for('guest_category_posts', category='photography') }}">Photography</a></li>
+        <li><a class="text-gray-400 hover:text-white" href="{{ url_for('guest_category_posts', category='travel') }}">Travel</a></li>
+        <li><a class="text-gray-400 hover:text-white" href="{{ url_for('guest_category_posts', category='adventure') }}">Adventure</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-4">Explore</h3>
+      <ul class="space-y-2">
+        <li><a class="text-gray-400 hover:text-white" href="{{ url_for('guest_explore') }}">Explore</a></li>
+        <li><a class="text-gray-400 hover:text-white" href="{{ url_for('index') }}">Home</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-4">Account</h3>
+      <ul class="space-y-2">
+        <li><a class="text-gray-400 hover:text-white" href="{{ url_for('login') }}">Login</a></li>
+        <li><a class="text-gray-400 hover:text-white" href="{{ url_for('register') }}">Sign Up</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+    <p class="text-gray-400 text-sm">© 2023 DriftLens. All rights reserved.</p>
+  </div>
+</div>
+</footer>
+
+<script>
+  AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+  feather.replace();
+
+  function showLoginModal() {
+    document.getElementById('loginModal').classList.remove('hidden');
+  }
+
+  function closeLoginModal() {
+    document.getElementById('loginModal').classList.add('hidden');
+  }
+
+  document.getElementById('loginModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeLoginModal();
+    }
+  });
+
+  // Mobile menu toggle
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    if (menu.classList.contains('hidden')) {
+      menu.classList.remove('hidden');
+      menu.classList.add('animate-slideDown');
+      menuIcon.classList.add('hidden');
+      closeIcon.classList.remove('hidden');
+    } else {
+      menu.classList.add('hidden');
+      menu.classList.remove('animate-slideDown');
+      menuIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    }
+    feather.replace();
+  }
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const button = document.getElementById('mobile-menu-button');
+    if (!menu.contains(e.target) && !button.contains(e.target) && !menu.classList.contains('hidden')) {
+      toggleMobileMenu();
+    }
+  });
+</script>
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+</body>
+</html>
+

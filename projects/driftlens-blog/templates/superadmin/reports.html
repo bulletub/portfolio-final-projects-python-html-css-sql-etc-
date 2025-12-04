@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports Management | DriftLens Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+</style>
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens Admin</span>
+</a>
+</div>
+<div class="flex items-center space-x-4">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('manage_users') }}">Users</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('manage_posts') }}">Posts</a>
+<a class="text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('superadmin_reports') }}">Reports</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">Logout</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Header -->
+<section class="hero-gradient text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h1 class="text-4xl md:text-5xl font-bold title-font mb-4">Reports Management</h1>
+<p class="text-lg md:text-xl opacity-90">Review and manage user reports</p>
+</div>
+</section>
+
+<!-- Reports Section -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Tabs -->
+<div class="mb-8 border-b border-gray-200">
+<nav class="-mb-px flex space-x-8">
+<button onclick="switchTab('user')" id="tab-user" class="tab-button border-b-2 border-blue-600 text-blue-600 py-4 px-1 font-medium text-sm">
+User Reports ({{ user_reports|length }})
+</button>
+<button onclick="switchTab('post')" id="tab-post" class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm">
+Post Reports ({{ post_reports|length }})
+</button>
+</nav>
+</div>
+
+<!-- User Reports Tab -->
+<div id="content-user" class="tab-content">
+{% if user_reports %}
+<div class="space-y-6">
+{% for report in user_reports %}
+<div class="bg-white rounded-lg shadow-lg border p-6">
+<div class="flex items-start justify-between mb-4">
+<div class="flex-1">
+                <div class="flex items-center space-x-4 mb-2">
+                <span class="px-3 py-1 text-sm font-semibold rounded-full {% if report.status == 'pending' %}bg-yellow-100 text-yellow-800{% elif report.status == 'resolved' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ report.status.title() }}
+                </span>
+                <span class="text-sm text-gray-500">{{ report.created_at|philippine_time }}</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Report #{{ report.id }}</h3>
+<p class="text-gray-600 mb-2"><strong>Reason:</strong> {{ report.reason }}</p>
+<p class="text-gray-600 mb-2"><strong>Description:</strong> {{ report.description or 'No description provided' }}</p>
+</div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4 mb-4">
+<div class="bg-gray-50 p-4 rounded-lg">
+<h4 class="font-semibold text-gray-800 mb-2">Reporter</h4>
+<p class="text-sm text-gray-600">{{ report.reporter.email }}</p>
+</div>
+<div class="bg-gray-50 p-4 rounded-lg">
+<h4 class="font-semibold text-gray-800 mb-2">Reported User</h4>
+<p class="text-sm text-gray-600">{{ report.reported_user.email }}</p>
+</div>
+</div>
+
+{% if report.admin_notes %}
+<div class="bg-blue-50 p-4 rounded-lg mb-4">
+<h4 class="font-semibold text-blue-800 mb-2">Admin Notes</h4>
+<p class="text-sm text-blue-700">{{ report.admin_notes }}</p>
+</div>
+{% endif %}
+
+{% if report.status == 'pending' %}
+<div class="bg-gray-50 p-4 rounded-lg mb-4">
+<h4 class="font-semibold text-gray-800 mb-2">Reported User Status</h4>
+<p class="text-sm text-gray-600">Status: <span class="font-semibold">{{ report.reported_user.status.title() }}</span></p>
+{% if report.reported_user.warning_count > 0 %}
+<p class="text-sm text-yellow-600">Warning Count: {{ report.reported_user.warning_count }}</p>
+{% endif %}
+</div>
+<div class="flex space-x-4">
+<button data-report-id="{{ report.id }}" data-action="warn" class="resolve-user-report px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="alert-triangle"></i>
+Warn User
+</button>
+<button data-report-id="{{ report.id }}" data-action="block" class="resolve-user-report px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="user-x"></i>
+Block User
+</button>
+<button data-report-id="{{ report.id }}" data-action="dismiss" class="resolve-user-report px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="x"></i>
+Dismiss Report
+</button>
+</div>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-16">
+<div class="max-w-md mx-auto">
+<i class="w-16 h-16 text-gray-400 mx-auto mb-4" data-feather="flag"></i>
+<h3 class="text-xl font-semibold text-gray-600 mb-2">No Reports</h3>
+<p class="text-gray-500">No user reports have been submitted yet.</p>
+</div>
+</div>
+{% endif %}
+</div>
+</div>
+
+<!-- Post Reports Tab -->
+<div id="content-post" class="tab-content hidden">
+{% if post_reports %}
+<div class="space-y-6">
+{% for report in post_reports %}
+<div class="bg-white rounded-lg shadow-lg border p-6">
+<div class="flex items-start justify-between mb-4">
+<div class="flex-1">
+                <div class="flex items-center space-x-4 mb-2">
+                <span class="px-3 py-1 text-sm font-semibold rounded-full {% if report.status == 'pending' %}bg-yellow-100 text-yellow-800{% elif report.status == 'resolved' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ report.status.title() }}
+                </span>
+                <span class="text-sm text-gray-500">{{ report.created_at|philippine_time }}</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Post Report #{{ report.id }}</h3>
+<p class="text-gray-600 mb-2"><strong>Reason:</strong> {{ report.reason }}</p>
+<p class="text-gray-600 mb-2"><strong>Description:</strong> {{ report.description or 'No description provided' }}</p>
+{% if report.decision %}
+<p class="text-gray-600 mb-2"><strong>Suggested Action:</strong> {{ report.decision }}</p>
+{% endif %}
+</div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-4 mb-4">
+<div class="bg-gray-50 p-4 rounded-lg">
+<h4 class="font-semibold text-gray-800 mb-2">Reporter</h4>
+<p class="text-sm text-gray-600">{{ report.reporter.email }}</p>
+</div>
+<div class="bg-gray-50 p-4 rounded-lg">
+<h4 class="font-semibold text-gray-800 mb-2">Reported Post</h4>
+<p class="text-sm text-gray-600 font-medium">{{ report.post.title }}</p>
+<p class="text-xs text-gray-500">By {{ report.post.user.email }}</p>
+<a href="{{ url_for('view_post', post_id=report.post.id) }}" target="_blank" class="text-blue-600 hover:underline text-sm">View Post →</a>
+</div>
+</div>
+
+{% if report.admin_notes %}
+<div class="bg-blue-50 p-4 rounded-lg mb-4">
+<h4 class="font-semibold text-blue-800 mb-2">Admin Notes</h4>
+<p class="text-sm text-blue-700">{{ report.admin_notes }}</p>
+</div>
+{% endif %}
+
+{% if report.status == 'pending' %}
+<div class="flex space-x-4">
+<button data-report-id="{{ report.id }}" data-action="warn" class="resolve-post-report px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="alert-triangle"></i>
+Warn Author
+</button>
+<button data-report-id="{{ report.id }}" data-action="remove" class="resolve-post-report px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="trash-2"></i>
+Remove Post
+</button>
+<button data-report-id="{{ report.id }}" data-action="dismiss" class="resolve-post-report px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="x"></i>
+Dismiss Report
+</button>
+</div>
+{% endif %}
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-16">
+<div class="max-w-md mx-auto">
+<i class="w-16 h-16 text-gray-400 mx-auto mb-4" data-feather="flag"></i>
+<h3 class="text-xl font-semibold text-gray-600 mb-2">No Post Reports</h3>
+<p class="text-gray-500">No post reports have been submitted yet.</p>
+</div>
+</div>
+{% endif %}
+</div>
+</div>
+</section>
+
+<!-- Resolve Report Modal -->
+<div class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50" id="resolveModal">
+<div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+<button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" onclick="closeResolveModal()">
+<i data-feather="x"></i>
+</button>
+<h2 class="text-xl font-bold mb-4">Resolve Report</h2>
+<form id="resolveForm">
+<input type="hidden" id="reportId" name="reportId">
+<input type="hidden" id="action" name="action">
+<div class="mb-4" id="warningMessageField">
+<label class="block text-gray-700 font-medium mb-2">
+<span id="messageLabel">Warning Message</span>
+<span class="text-red-500">*</span>
+</label>
+<textarea id="warningMessage" name="warningMessage" rows="3" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter a custom message for the user..."></textarea>
+<p class="text-xs text-gray-500 mt-1">This message will be shown to the user when they log in.</p>
+</div>
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-2">Admin Notes (Internal)</label>
+<textarea id="adminNotes" name="adminNotes" rows="2" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add internal notes about this resolution..."></textarea>
+</div>
+<div class="flex justify-end space-x-4">
+<button type="button" onclick="closeResolveModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+Cancel
+</button>
+<button type="submit" id="submitBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+Resolve Report
+</button>
+</div>
+</form>
+</div>
+</div>
+
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+
+    let currentReportType = 'user'; // Track which type of report we're resolving
+
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remove active state from all tabs
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('border-blue-600', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Show selected tab content
+        document.getElementById('content-' + tabName).classList.remove('hidden');
+        
+        // Add active state to selected tab
+        const activeTab = document.getElementById('tab-' + tabName);
+        activeTab.classList.add('border-blue-600', 'text-blue-600');
+        activeTab.classList.remove('border-transparent', 'text-gray-500');
+    }
+
+    function resolveReport(reportId, action) {
+        currentReportType = 'user';
+        document.getElementById('reportId').value = reportId;
+        document.getElementById('action').value = action;
+        
+        // Update modal based on action
+        const submitBtn = document.getElementById('submitBtn');
+        const messageLabel = document.getElementById('messageLabel');
+        const warningMessageField = document.getElementById('warningMessageField');
+        
+        if (action === 'warn') {
+            submitBtn.className = 'px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700';
+            submitBtn.textContent = 'Send Warning';
+            messageLabel.textContent = 'Warning Message';
+            warningMessageField.style.display = 'block';
+        } else if (action === 'block') {
+            submitBtn.className = 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700';
+            submitBtn.textContent = 'Block User';
+            messageLabel.textContent = 'Block Message';
+            warningMessageField.style.display = 'block';
+        } else {
+            submitBtn.className = 'px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700';
+            submitBtn.textContent = 'Dismiss Report';
+            warningMessageField.style.display = 'none';
+        }
+        
+        document.getElementById('resolveModal').classList.remove('hidden');
+    }
+
+    function resolvePostReport(reportId, action) {
+        currentReportType = 'post';
+        document.getElementById('reportId').value = reportId;
+        document.getElementById('action').value = action;
+        document.getElementById('resolveModal').classList.remove('hidden');
+    }
+
+    // Event delegation for resolve buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.resolve-user-report')) {
+            const btn = e.target.closest('.resolve-user-report');
+            resolveReport(btn.dataset.reportId, btn.dataset.action);
+        } else if (e.target.closest('.resolve-post-report')) {
+            const btn = e.target.closest('.resolve-post-report');
+            resolvePostReport(btn.dataset.reportId, btn.dataset.action);
+        }
+    });
+
+    function closeResolveModal() {
+        document.getElementById('resolveModal').classList.add('hidden');
+    }
+
+    // Handle resolve form submission
+    document.getElementById('resolveForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const reportId = document.getElementById('reportId').value;
+        const action = document.getElementById('action').value;
+        const adminNotes = document.getElementById('adminNotes').value;
+        const warningMessage = document.getElementById('warningMessage').value;
+        
+        // Validate warning message for warn/block actions
+        if ((action === 'warn' || action === 'block') && !warningMessage.trim()) {
+            alert('Please enter a message for the user.');
+            return;
+        }
+        
+        const url = currentReportType === 'post' 
+            ? `/superadmin/post_reports/${reportId}/resolve`
+            : `/superadmin/reports/${reportId}/resolve`;
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: action,
+                admin_notes: adminNotes,
+                warning_message: warningMessage
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert(data.message);
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error resolving report');
+        });
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+</body>
+</html>

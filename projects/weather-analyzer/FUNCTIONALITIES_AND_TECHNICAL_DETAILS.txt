@@ -1,0 +1,503 @@
+================================================================================
+              WEATHER ANALYZER - FUNCTIONALITIES & TECHNICAL DETAILS
+================================================================================
+
+This document provides comprehensive information about the Weather Analyzer
+application, including its functionalities, modules used, APIs integrated,
+and Python implementation details.
+
+================================================================================
+                            OVERVIEW
+================================================================================
+
+The Weather Analyzer is a web-based application built with Python Flask that
+provides real-time weather analysis for locations within the Philippines. It
+features an interactive map, historical weather data visualization, advanced
+statistics, weather alerts, and automatic real-time updates.
+
+================================================================================
+                        KEY FUNCTIONALITIES
+================================================================================
+
+1. INTERACTIVE MAP NAVIGATION
+   - Leaflet.js-based interactive map of the Philippines
+   - Click anywhere on the map to pin a location
+   - Search bar integrated in the map for finding places
+   - Map bounds restricted to Philippines only (coordinates validation)
+   - Persistent markers that survive page updates
+   - City markers showing predefined Philippine cities
+   - Automatic zoom and pan when selecting locations
+
+2. REAL-TIME WEATHER DATA
+   - Current temperature, humidity, pressure, wind speed
+   - Weather condition icons (cloudy, sunny, rainy, etc.)
+   - Auto-refresh feature (every 1 minute by default)
+   - Sidebar toggle between 7-day forecast and real-time conditions
+   - Weather alerts based on current conditions
+
+3. HISTORICAL WEATHER ANALYSIS
+   - Date range filtering (1, 3, 7, 14, 30 days)
+   - Multiple data types: Temperature, Humidity, Pressure, Precipitation,
+     Wind Speed, Cloud Cover
+   - Trend charts showing weather patterns over time
+   - Distribution charts showing data frequency
+   - Statistics: Min, Max, Average
+   - Advanced statistics: Median, Standard Deviation, Variance, Percentiles,
+     Trend Analysis
+
+4. LOCATION MANAGEMENT
+   - Dropdown selection of major Philippine cities
+   - Map pinning for custom locations
+   - Bidirectional synchronization between city dropdown and map pin
+   - URL-based location persistence
+   - Geocoding and reverse geocoding for place names
+
+5. WEATHER ALERTS SYSTEM
+   - High/Low Temperature alerts
+   - Extreme Heat/Cold warnings
+   - Strong Wind alerts
+   - Heavy Rainfall warnings
+   - Thunderstorm alerts
+   - Snow alerts (rare in Philippines)
+   - Fog warnings
+   - High/Low Humidity alerts
+   - Pressure change alerts
+
+6. DATA VISUALIZATION
+   - Line charts for trends (using Matplotlib)
+   - Histogram charts for distributions
+   - Data tables with timestamps
+   - Forecast cards showing daily weather
+   - Mini forecast in sidebar
+
+7. USER INTERFACE FEATURES
+   - Glassmorphism design with modern UI
+   - Splash screen on initial load
+   - Non-scrollable fixed layout
+   - Hidden scrollbars with smooth scrolling
+   - Responsive sidebar with toggle functionality
+   - Color-coded weather alerts
+
+================================================================================
+                         PYTHON MODULES USED
+================================================================================
+
+CORE MODULES (Built-in):
+------------------------
+1. flask - Web framework for creating the web application
+   - Flask: Main application class
+   - render_template: Rendering HTML templates
+   - request: Handling HTTP requests
+   - jsonify: Returning JSON responses
+
+2. datetime - Date and time operations
+   - datetime.date: Date objects
+   - datetime.timedelta: Time differences
+   - datetime.datetime: Date-time objects
+   - Used for: Date filtering, timestamp formatting, calculating date ranges
+
+3. io - Input/Output operations
+   - Used for: Creating in-memory file objects for chart generation
+
+4. base64 - Encoding binary data
+   - Used for: Encoding Matplotlib charts as base64 for embedding in HTML
+
+5. math - Mathematical operations
+   - Used for: Statistical calculations, rounding, mathematical functions
+
+6. json - JSON data handling
+   - Used for: Parsing API responses, data serialization
+
+7. functools - Higher-order functions
+   - wraps: Decorator utilities (if used)
+
+THIRD-PARTY MODULES (External):
+--------------------------------
+1. Flask (>=2.3.0)
+   - Web application framework
+   - Handles routing, templating, request/response
+   - URL: https://flask.palletsprojects.com/
+
+2. requests (>=2.28.0)
+   - HTTP library for making API calls
+   - Used to fetch weather data from Open-Meteo API
+   - Used for reverse geocoding via Nominatim API
+   - URL: https://requests.readthedocs.io/
+
+3. matplotlib (>=3.7.0)
+   - Plotting library for creating charts
+   - Figure: For creating chart figures
+   - Used to generate trend line charts and distribution histograms
+   - Charts are converted to base64 images for web display
+   - URL: https://matplotlib.org/
+
+4. numpy (implicit dependency)
+   - Numerical computing library
+   - Required by matplotlib for array operations
+   - Used for statistical calculations
+   - URL: https://numpy.org/
+
+5. Werkzeug (>=2.3.0)
+   - WSGI utility library
+   - Core dependency of Flask
+   - Handles HTTP utilities, URL routing, debugging
+   - URL: https://werkzeug.palletsprojects.com/
+
+FRONTEND TECHNOLOGIES (Client-Side):
+------------------------------------
+1. HTMX - For dynamic content updates without full page reloads
+   - URL: https://htmx.org/
+
+2. Leaflet.js - Interactive maps
+   - URL: https://leafletjs.com/
+
+3. OpenStreetMap - Map tile provider
+   - URL: https://www.openstreetmap.org/
+
+4. HTML5, CSS3, JavaScript (Vanilla)
+
+================================================================================
+                           APIS USED
+================================================================================
+
+1. OPEN-METEO API (Weather Data)
+--------------------------------
+- Type: REST API (Free, No API Key Required)
+- Base URL: https://api.open-meteo.com/v1/
+- Endpoints Used:
+  * /forecast - Current weather and forecast data
+  * /forecast (with past dates) - Historical hourly data (<=90 days)
+  * /archive - Historical daily data (>90 days)
+
+- Parameters Used:
+  * latitude, longitude: Location coordinates
+  * hourly: temperature_2m, relative_humidity_2m, pressure_msl, 
+           precipitation, windspeed_10m, winddirection_10m, cloudcover,
+           weathercode, visibility
+  * daily: temperature_2m_max, temperature_2m_min, weathercode,
+          precipitation_sum, windspeed_10m_max
+  * current_weather: true
+  * timezone: auto
+  * start_date, end_date: For historical data
+
+- Data Returned:
+  * Hourly weather data arrays
+  * Daily aggregated data
+  * Current weather conditions
+  * Weather codes (WMO format)
+
+- Usage in Code:
+  * _fetch_weather_data() function in weather_analyzer.py
+  * Handles both forecast and historical data fetching
+  * Automatically switches between hourly and daily data based on date range
+
+- Documentation: https://open-meteo.com/en/docs
+
+2. NOMINATIM API (Geocoding)
+-----------------------------
+- Type: REST API (Free, No API Key Required, Usage Policy Applies)
+- Base URL: https://nominatim.openstreetmap.org/
+- Endpoints Used:
+  * /search - Forward geocoding (place name → coordinates)
+  * /reverse - Reverse geocoding (coordinates → place name)
+
+- Parameters Used:
+  * q: Search query
+  * lat, lon: Coordinates for reverse geocoding
+  * format: json
+  * countrycodes: ph (restricted to Philippines)
+  * limit: 5 (for search results)
+  * viewbox: Philippines bounding box
+  * bounded: 1
+
+- Data Returned:
+  * Place names and addresses
+  * Coordinates (latitude, longitude)
+  * Display names
+
+- Usage in Code:
+  * Frontend JavaScript in index.html
+  * Used for map search suggestions
+  * Used for reverse geocoding when clicking map
+
+- Documentation: https://nominatim.org/release-docs/latest/api/Overview/
+- Usage Policy: Must include User-Agent header (handled by browser)
+
+3. OPENSTREETMAP (Map Tiles)
+-----------------------------
+- Type: Tile Server (Free)
+- URL Pattern: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+- Usage: Served through Leaflet.js map library
+- Attribution: Required and included in map
+
+================================================================================
+                      PYTHON IMPLEMENTATION DETAILS
+================================================================================
+
+ARCHITECTURE:
+-------------
+- MVC-like pattern with Flask
+- Model: Data fetching and processing (weather_analyzer.py)
+- View: HTML templates (_page_shell.html, index.html)
+- Controller: Flask routes and context composition
+
+KEY FUNCTIONS IN weather_analyzer.py:
+------------------------------------
+
+1. _fetch_weather_data(lat, lon, days=7)
+   - Fetches weather data from Open-Meteo API
+   - Handles both current/forecast and historical data
+   - Uses hourly data for <=90 days
+   - Uses daily aggregated data for >90 days
+   - Returns combined payload dictionary
+
+2. _compose_context(args)
+   - Main function that orchestrates data collection
+   - Handles location validation (Philippines bounds)
+   - Fetches weather data
+   - Calculates statistics
+   - Generates charts
+   - Composes all data for template rendering
+   - Returns context dictionary
+
+3. _calculate_stats(data)
+   - Calculates basic statistics: min, max, average
+   - Filters out None values
+   - Returns statistics dictionary
+
+4. _calculate_advanced_stats(data)
+   - Calculates advanced statistics: median, std deviation, variance
+   - Calculates percentiles (25th, 50th, 75th, 90th)
+   - Performs trend analysis (slope calculation)
+   - Returns advanced statistics dictionary
+
+5. _generate_alerts(current, hourly)
+   - Analyzes current weather conditions
+   - Generates alerts based on thresholds
+   - Returns list of alert dictionaries
+
+6. _trend_chart(data, dtype, times)
+   - Creates line chart using Matplotlib
+   - Formats data for visualization
+   - Converts to base64 PNG image
+   - Returns base64 string
+
+7. _distribution_chart(data, dtype)
+   - Creates histogram chart using Matplotlib
+   - Shows data distribution
+   - Converts to base64 PNG image
+   - Returns base64 string
+
+8. _get_region_info(lat, lon, name)
+   - Determines region based on coordinates
+   - Uses coordinate ranges for Philippines regions
+   - Returns region name string
+
+9. _icon_from_wmo(code, day=True)
+   - Converts WMO weather codes to icon names
+   - Handles day/night variations
+   - Returns icon identifier
+
+ROUTES:
+-------
+1. @app.route("/")
+   - Main page route
+   - Renders index.html with full context
+
+2. @app.route("/partial/page")
+   - HTMX endpoint for partial page updates
+   - Returns updated _page_shell.html
+   - Used for dynamic content updates
+
+3. @app.route("/api/current")
+   - REST API endpoint for current weather
+   - Returns JSON with current conditions
+   - Used by real-time update mechanism
+   - Includes Philippines bounds validation
+
+DATA VALIDATION:
+----------------
+- Philippines bounds validation (Lat: 4.2-21.1, Lon: 116.9-127.0)
+- Coordinate constraints applied to all user inputs
+- None value filtering in all statistical calculations
+- Error handling with fallback values
+
+STATISTICAL CALCULATIONS:
+-------------------------
+- Basic Stats: min(), max(), sum()/len() for average
+- Advanced Stats:
+  * Median: sorted middle value
+  * Standard Deviation: sqrt(sum((x - mean)²) / n)
+  * Variance: sum((x - mean)²) / n
+  * Percentiles: sorted value at percentile position
+  * Trend: Linear regression slope
+
+CHART GENERATION:
+-----------------
+- Uses Matplotlib Figure() to create charts in memory
+- Charts saved to BytesIO buffer
+- Encoded to base64 for embedding in HTML
+- No file system writes (all in-memory)
+
+ERROR HANDLING:
+---------------
+- Try-except blocks around API calls
+- Timeout handling (20 seconds for weather API)
+- None value filtering in data processing
+- Graceful degradation when data is missing
+- User-friendly error messages
+
+================================================================================
+                      FRONTEND IMPLEMENTATION
+================================================================================
+
+JAVASCRIPT FUNCTIONS:
+---------------------
+1. initLeafletMap() - Initializes Leaflet map with bounds
+2. setupMapClickHandler() - Handles map click events
+3. initializeSearchBox() - Sets up map search functionality
+4. updateWeatherWithLocation() - Updates weather for pinned location
+5. updateWeatherWithCity() - Updates weather for selected city
+6. findMatchingCity() - Finds city matching coordinates
+7. validatePhilippinesCoordinates() - Validates coordinates
+8. constrainToPhilippines() - Constrains coordinates to bounds
+9. toggleSidebarView() - Switches between forecast/realtime views
+10. updateCurrentConditions() - Updates real-time data display
+11. initRealTimeUpdates() - Sets up auto-refresh mechanism
+
+HTMX INTEGRATION:
+-----------------
+- Used for partial page updates
+- Eliminates full page reloads
+- Preserves map state and markers
+- Dynamic content swapping
+
+LEAFLET MAP FEATURES:
+---------------------
+- Bounded to Philippines only
+- Custom pin markers
+- Search control integration
+- Marker click handlers
+- Map click handlers
+- Persistent state via URL parameters
+
+================================================================================
+                           DATA FLOW
+================================================================================
+
+1. User Interaction:
+   - Selects city OR pins location OR searches place
+
+2. Frontend JavaScript:
+   - Validates coordinates (Philippines bounds)
+   - Updates URL parameters
+   - Triggers HTMX request OR direct API call
+
+3. Backend Flask:
+   - Receives request parameters
+   - Validates location again
+   - Fetches weather data from Open-Meteo API
+   - Processes data (calculations, chart generation)
+   - Composes context
+
+4. Template Rendering:
+   - Renders HTML with weather data
+   - Embeds base64 chart images
+   - Includes JavaScript for map initialization
+
+5. Frontend Display:
+   - Updates sidebar, dashboard, map
+   - Initializes map with markers
+   - Starts real-time update cycle
+
+6. Real-time Updates:
+   - JavaScript polls /api/current every minute
+   - Updates sidebar and current conditions
+   - Maintains map state
+
+================================================================================
+                        SECURITY & PRIVACY
+================================================================================
+
+- No user data collection
+- No authentication required
+- All API calls are client-side or server-side HTTP requests
+- No database or persistent storage
+- Philippines bounds validation prevents out-of-scope queries
+- No sensitive information stored
+
+================================================================================
+                           PERFORMANCE
+================================================================================
+
+OPTIMIZATIONS:
+--------------
+- Virtual environment for dependency isolation
+- In-memory chart generation (no file I/O)
+- Efficient data filtering (removes None values early)
+- API response caching (via browser)
+- Partial page updates (HTMX reduces full reloads)
+- Lazy loading of map tiles
+
+LIMITATIONS:
+------------
+- Historical data limited to 30 days in UI (can fetch up to 2 years)
+- Hourly data only for <=90 days (daily for longer periods)
+- Rate limiting by Open-Meteo API (generous free tier)
+- Nominatim API usage policy (1 request per second recommended)
+
+================================================================================
+                        FUTURE ENHANCEMENTS
+================================================================================
+
+Potential improvements:
+- Export data to CSV/JSON
+- Weather predictions beyond 16 days
+- Multiple location comparison
+- Weather data caching
+- Offline mode with cached data
+- Mobile app version
+- Weather notifications
+- Historical data export
+
+================================================================================
+                           DEPENDENCIES SUMMARY
+================================================================================
+
+REQUIRED PACKAGES (requirements.txt):
+--------------------------------------
+Flask>=2.3.0          # Web framework
+requests>=2.28.0      # HTTP library
+matplotlib>=3.7.0     # Chart generation
+numpy                 # Numerical operations (matplotlib dependency)
+Werkzeug>=2.3.0       # WSGI utilities (Flask dependency)
+
+EXTERNAL SERVICES:
+------------------
+- Open-Meteo API (weather data)
+- Nominatim API (geocoding)
+- OpenStreetMap (map tiles)
+
+================================================================================
+                           CONCLUSION
+================================================================================
+
+The Weather Analyzer is a full-stack Python web application that demonstrates:
+- Flask web framework usage
+- REST API integration
+- Data visualization with Matplotlib
+- Interactive mapping with Leaflet.js
+- Real-time updates without page reloads
+- Statistical analysis and data processing
+- Modern UI/UX design
+
+All code is Python-based on the backend, with standard web technologies
+(HTML/CSS/JavaScript) on the frontend. No proprietary frameworks or paid
+services are required.
+
+For installation and running instructions, please refer to RUNNING_INSTRUCTIONS.txt
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+

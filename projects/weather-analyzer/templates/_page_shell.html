@@ -1,0 +1,266 @@
+<div class="container">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div>
+      <h2>🌤 Weather Analyzer</h2>
+      <div class="city" id="sidebarCity">{{ place_name.upper() }}</div>
+      <div class="weather-icon" id="sidebarIcon">
+        <img src="{{ current_icon }}" class="sidebar-icon" />
+      </div>
+      <div id="sidebarTemp">🌡 {{ current.temperature }}°C</div>
+      <div id="sidebarHumidity">💧 {{ current.humidity if current.humidity is not none else "N/A" }}%</div>
+      <div id="sidebarWind">💨 {{ current.windspeed }} km/h</div>
+      <div id="sidebarPressure">🔵 {{ current.pressure if current.pressure is not none else "N/A" }} hPa</div>
+
+      <div class="region-info">
+        <div class="region-text">🗺️ {{ region_info }}</div>
+        <div class="coords-text">{{ coords_display }}</div>
+      </div>
+      
+      <!-- Toggle for 7-day forecast vs real-time info -->
+      <div class="sidebar-toggle">
+        <button id="sidebarToggle" class="toggle-btn" onclick="toggleSidebarView()">
+          <span id="toggleText">📅 7-Day Forecast</span>
+        </button>
+      </div>
+      
+      <!-- 7-Day Forecast View -->
+      <div class="mini-forecast" id="miniForecast">
+        {% for d in sidebar_forecast %}
+          <div class="mini-day">
+            <span>{{ d.label }}</span>
+            <img src="{{ d.icon }}" class="sidebar-icon" />
+            <span>{{ d.max }}°/{{ d.min }}°</span>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <!-- Real-time Info View (hidden by default) -->
+      <div class="realtime-info" id="realtimeInfo" style="display: none;">
+        <div class="realtime-section">
+          <h4>📊 Current Conditions</h4>
+          <div class="realtime-item">
+            <span class="realtime-label">Temperature:</span>
+            <span class="realtime-value" id="realtimeTemp">{{ current.temperature }}°C</span>
+          </div>
+          <div class="realtime-item">
+            <span class="realtime-label">Humidity:</span>
+            <span class="realtime-value" id="realtimeHumidity">{{ current.humidity if current.humidity is not none else "N/A" }}%</span>
+          </div>
+          <div class="realtime-item">
+            <span class="realtime-label">Pressure:</span>
+            <span class="realtime-value" id="realtimePressure">{{ current.pressure if current.pressure is not none else "N/A" }} hPa</span>
+          </div>
+          <div class="realtime-item">
+            <span class="realtime-label">Wind Speed:</span>
+            <span class="realtime-value" id="realtimeWind">{{ current.windspeed }} km/h</span>
+          </div>
+          {% if current.cloudcover %}
+          <div class="realtime-item">
+            <span class="realtime-label">Cloud Cover:</span>
+            <span class="realtime-value">{{ current.cloudcover }}%</span>
+          </div>
+          {% endif %}
+          {% if current.precipitation %}
+          <div class="realtime-item">
+            <span class="realtime-label">Precipitation:</span>
+            <span class="realtime-value">{{ current.precipitation }} mm</span>
+          </div>
+          {% endif %}
+        </div>
+        <div class="realtime-update">
+          <small id="realtimeTimestamp">Last updated: {{ last_update }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="headline">
+      <h1 id="headline">{{ headline }}</h1>
+      <div class="headline-meta">
+        <div class="real-time-indicator" id="realTimeIndicator">
+          <span class="pulse-dot"></span>
+          <span>Live</span>
+          <small id="lastUpdateTime">{% if last_update %}{{ last_update }}{% endif %}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Controls - Easy to Find -->
+    <div class="top-controls">
+      <form id="controlsForm"
+            hx-get="/partial/page"
+            hx-target="#pageShell"
+            hx-swap="innerHTML"
+            hx-include="[name='city'], [name='days'], [name='type'], [name='lat'], [name='lon'], [name='place']">
+        <!-- Hidden inputs to preserve location when filtering -->
+        <input type="hidden" name="lat" id="hiddenLat" value="{{ coords.lat }}">
+        <input type="hidden" name="lon" id="hiddenLon" value="{{ coords.lon }}">
+        <input type="hidden" name="place" id="hiddenPlace" value="{{ place_name }}">
+        
+        <div class="control-group">
+          <label for="citySelect">📍 City:</label>
+          <select id="citySelect" name="city" onchange="updateWeatherWithCity(this.value)">
+            {% for key, c in cities.items() %}
+              <option value="{{ key }}" {% if selected.city==key %}selected{% endif %}>{{ c.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="control-group highlight">
+          <label for="dateRange">📅 Date Range:</label>
+          <select id="dateRange" name="days" onchange="updateWeatherWithCurrentLocation(this.value)">
+            <option value="1"  {% if selected.days==1  %}selected{% endif %}>Today</option>
+            <option value="3"  {% if selected.days==3  %}selected{% endif %}>Last 3 Days</option>
+            <option value="7"  {% if selected.days==7  %}selected{% endif %}>Last 7 Days</option>
+            <option value="14" {% if selected.days==14 %}selected{% endif %}>Last 14 Days</option>
+            <option value="30" {% if selected.days==30 %}selected{% endif %}>Last 30 Days</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="dataType">📊 Data Type:</label>
+          <select id="dataType" name="type" onchange="updateWeatherWithDataType(this.value)">
+            {% for opt in ['temperature','humidity','pressure','precipitation','windspeed','cloudcover'] %}
+              <option value="{{ opt }}" {% if selected.type==opt %}selected{% endif %}>
+                {{ opt.capitalize().replace('_',' ') }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" id="updateBtn">🔄 Update</button>
+      </form>
+    </div>
+    <div id="weatherAlert">
+      {% if alerts %}
+        {% for alert in alerts %}
+          <div class="alert alert-{{ alert.severity }}">
+            {{ alert.message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <div id="dashboard">
+      <div class="dashboard-container">
+        <div class="card">
+          <h3>🗺️ Philippine Weather Map</h3>
+          <!-- Map holder carries data for JS to use -->
+          <div id="mapContainer" style="height: 350px; border-radius: 12px; margin-bottom: 15px; overflow:hidden;">
+  <div id="map"
+       data-lat="{{ coords.lat }}"
+       data-lon="{{ coords.lon }}"
+       data-cities='{{ cities | tojson }}'
+       style="height: 100%; width: 100%; border-radius: 12px;">
+  </div>
+</div>
+
+        </div>
+
+        <div class="card">
+          <h3>📈 Historical Weather Trends</h3>
+<div class="chart-container">
+  <img src="{{ trend_png }}" alt="Trend">
+</div>
+<div id="statistics">
+  Min: {{ stats.min }} | Max: {{ stats.max }} | Avg: {{ stats.avg }}
+</div>
+
+
+        <div class="card">
+          <h3>🌡 Current Conditions</h3>
+          <div id="currentStats">
+            <div class="current-grid">
+              <div class="current-item"><p>🌡 Temp</p><p id="currentTemp">{{ current.temperature }}°C</p></div>
+              <div class="current-item"><p>💧 Humidity</p><p id="currentHumidity">{{ current.humidity }}%</p></div>
+              <div class="current-item"><p>🌍 Pressure</p><p id="currentPressure">{{ current.pressure }} hPa</p></div>
+              <div class="current-item"><p>💨 Wind</p><p id="currentWind">{{ current.windspeed }} km/h</p></div>
+              {% if current.cloudcover %}<div class="current-item"><p>☁️ Clouds</p><p>{{ current.cloudcover }}%</p></div>{% endif %}
+              {% if current.precipitation %}<div class="current-item"><p>🌧️ Precip</p><p>{{ current.precipitation }} mm</p></div>{% endif %}
+              {% if current.visibility %}<div class="current-item"><p>👁️ Visibility</p><p>{{ current.visibility }} km</p></div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% if advanced_stats %}
+        <div class="card">
+          <h3>📊 Advanced Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Median:</span>
+              <span class="stat-value">{{ advanced_stats.median }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Std Deviation:</span>
+              <span class="stat-value">{{ advanced_stats.std_dev }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">25th Percentile:</span>
+              <span class="stat-value">{{ advanced_stats.percentile_25 }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">75th Percentile:</span>
+              <span class="stat-value">{{ advanced_stats.percentile_75 }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Trend:</span>
+              <span class="stat-value trend-{{ advanced_stats.trend_direction }}">{{ advanced_stats.trend_direction|title }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Variability:</span>
+              <span class="stat-value">{{ advanced_stats.coefficient_of_variation }}%</span>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+          <h3>📊 Data Distribution</h3>
+          <div class="chart-container">
+            <img src="{{ distribution_png }}" alt="Distribution" style="width:100%; height:auto; border-radius:8px;">
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📅 Day Forecast</h3>
+          <div class="forecast-grid" id="forecastGrid">
+            {% for f in forecast %}
+              <div class="forecast-item">
+                <p>{{ f.label }}</p>
+                <img src="{{ f.icon }}" alt="icon" class="forecast-icon" />
+                <p>🌡 {{ f.max }}° / {{ f.min }}°</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📋 Data Table</h3>
+          <div class="table-wrapper">
+            <table id="dataTable">
+              <tr><th>Time</th><th>{{ selected.type }}</th></tr>
+              {% for row in table_rows %}
+                <tr><td>{{ row[0] }}</td><td>{{ row[1] }}</td></tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auto-refresh-controls">
+      <label>
+        <input type="checkbox" id="autoRefreshToggle" checked> Auto-refresh every 
+        <select id="refreshInterval">
+          <option value="30">30 seconds</option>
+          <option value="60" selected>1 minute</option>
+          <option value="300">5 minutes</option>
+          <option value="600">10 minutes</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</div>

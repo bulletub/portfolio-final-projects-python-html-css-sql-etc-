@@ -27,7 +27,7 @@ git add .
 git commit -m "Initial portfolio commit"
 
 # Add your GitHub repository as remote (replace with your actual URL)
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git remote add origin https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-.git
 
 # Rename branch to main (if needed)
 git branch -M main
@@ -45,7 +45,7 @@ git push -u origin main
    - Branch: **main**
    - Folder: **/ (root)**
 5. Click **Save**
-6. Wait a few minutes, then visit: `https://YOUR_USERNAME.github.io/YOUR_REPO_NAME`
+6. Wait a few minutes, then visit: `https://bulletub.github.io/portfolio-final-projects-python-html-css-sql-etc-/`
 
 ## Step 4: Adding Your Localhost Projects
 

@@ -1,0 +1,48 @@
+{% extends "superadmin/base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+{% block header %}User Management{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="p-3 font-medium">Email</th>
+                    <th class="p-3 font-medium">Role</th>
+                    <th class="p-3 font-medium">Status</th>
+                    <th class="p-3 font-medium text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">{{ user.email }}</td>
+                    <td class="p-3 capitalize">{{ user.role }}</td>
+                    <td class="p-3">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {{ 'bg-green-100 text-green-800' if user.status == 'active' else 'bg-red-100 text-red-800' }}">
+                            {{ user.status }}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        <form action="{{ url_for('update_user', user_id=user.id) }}" method="POST" class="flex items-center justify-center space-x-2">
+                            <select name="role" class="border rounded px-2 py-1">
+                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+                            <select name="status" class="border rounded px-2 py-1">
+                                <option value="active" {% if user.status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="blocked" {% if user.status == 'blocked' %}selected{% endif %}>Blocked</option>
+                            </select>
+                            <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Profile | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+    .preview-image {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+</style>
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}" title="Messages">
+<i data-feather="message-circle" class="w-5 h-5"></i>
+<span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}" title="Groups">
+<i data-feather="users" class="w-5 h-5"></i>
+<span id="group-invitation-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}" title="Notifications">
+<i data-feather="bell" class="w-5 h-5"></i>
+<span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-blue-600 px-2 py-2 text-sm font-medium" href="{{ url_for('profile') }}" title="Profile">
+<i data-feather="user" class="w-5 h-5"></i>
+</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">Logout</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Header -->
+<section class="hero-gradient text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h1 class="text-4xl md:text-5xl font-bold title-font mb-4">Edit Profile</h1>
+<p class="text-lg md:text-xl opacity-90">Customize your profile information</p>
+</div>
+</section>
+
+<!-- Edit Profile Form -->
+<section class="py-16 bg-white">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="mb-6">
+{% for category, message in messages %}
+<div class="p-4 rounded-lg mb-2 {% if category == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+{{ message }}
+</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- Tabs -->
+<div class="mb-8 border-b border-gray-200">
+<nav class="-mb-px flex space-x-8">
+<button onclick="switchTab('profile')" id="tab-profile" class="tab-button border-b-2 border-blue-600 text-blue-600 py-4 px-1 font-medium text-sm">
+Profile Information
+</button>
+<button onclick="switchTab('security')" id="tab-security" class="tab-button border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm">
+Security Settings
+</button>
+</nav>
+</div>
+
+<!-- Profile Information Tab -->
+<div id="content-profile" class="tab-content">
+<div class="bg-white rounded-lg shadow-lg p-8">
+<form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+<input type="hidden" name="update_type" value="profile">
+
+<!-- Profile Picture -->
+<div class="mb-6 text-center">
+<label class="block text-gray-700 font-medium mb-4">Profile Picture</label>
+<div class="flex flex-col items-center">
+{% if current_user.profile_picture %}
+<img src="{{ url_for('uploaded_file', filename=current_user.profile_picture) }}" alt="Profile Picture" class="preview-image mb-4" id="profilePreview">
+{% else %}
+<div class="w-36 h-36 rounded-full bg-gray-300 flex items-center justify-center mb-4" id="profilePreview">
+<span class="text-5xl font-bold text-gray-600">{{ current_user.email[0].upper() }}</span>
+</div>
+{% endif %}
+<input type="file" name="profile_picture" accept="image/*" class="w-full max-w-md px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="previewImage(event)">
+<p class="text-sm text-gray-500 mt-2">Recommended: Square image, at least 300x300px</p>
+</div>
+</div>
+
+<!-- Display Name -->
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Display Name</label>
+<input type="text" name="display_name" value="{{ current_user.display_name or '' }}" placeholder="Your full name or nickname" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+<p class="text-sm text-gray-500 mt-1">This will be shown instead of your email username</p>
+</div>
+
+<!-- Bio -->
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Bio</label>
+<textarea name="bio" rows="4" placeholder="Tell others about yourself..." class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ current_user.bio or '' }}</textarea>
+<p class="text-sm text-gray-500 mt-1">Share your interests, hobbies, or a short introduction</p>
+</div>
+
+<div class="flex space-x-4">
+<button type="submit" class="flex items-center bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="save"></i>
+Save Profile
+</button>
+<a href="{{ url_for('profile') }}" class="flex items-center bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="arrow-left"></i>
+Cancel
+</a>
+</div>
+</form>
+</div>
+</div>
+
+<!-- Security Settings Tab -->
+<div id="content-security" class="tab-content hidden">
+<div class="bg-white rounded-lg shadow-lg p-8">
+<form method="POST" action="{{ url_for('edit_profile') }}">
+<input type="hidden" name="update_type" value="security">
+
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Email Address</label>
+<input type="email" name="email" value="{{ current_user.email }}" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+</div>
+
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">Current Password (required to confirm changes)</label>
+<input type="password" name="current_password" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+</div>
+
+<div class="mb-6">
+<label class="block text-gray-700 font-medium mb-2">New Password (leave blank to keep current)</label>
+<input type="password" name="new_password" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+</div>
+
+<div class="flex space-x-4">
+<button type="submit" class="flex items-center bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="save"></i>
+Update Security
+</button>
+<a href="{{ url_for('profile') }}" class="flex items-center bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="arrow-left"></i>
+Cancel
+</a>
+</div>
+</form>
+</div>
+</div>
+</div>
+</section>
+
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+
+    // Tab switching
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remove active state from all tabs
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('border-blue-600', 'text-blue-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Show selected tab content
+        document.getElementById('content-' + tabName).classList.remove('hidden');
+        
+        // Add active state to selected tab
+        const activeTab = document.getElementById('tab-' + tabName);
+        activeTab.classList.add('border-blue-600', 'text-blue-600');
+        activeTab.classList.remove('border-transparent', 'text-gray-500');
+    }
+
+    // Image preview
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('profilePreview');
+                if (preview.tagName === 'IMG') {
+                    preview.src = e.target.result;
+                } else {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview-image">`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Load notification counts
+    function loadNotificationCounts() {
+        fetch('/get_notification_counts')
+            .then(response => response.json())
+            .then(data => {
+                // Update message count
+                const messageCount = document.getElementById('message-count');
+                if (data.messages > 0) {
+                    messageCount.textContent = data.messages;
+                    messageCount.classList.remove('hidden');
+                } else {
+                    messageCount.classList.add('hidden');
+                }
+                
+                // Update notification count
+                const notificationCount = document.getElementById('notification-count');
+                if (data.notifications > 0) {
+                    notificationCount.textContent = data.notifications;
+                    notificationCount.classList.remove('hidden');
+                } else {
+                    notificationCount.classList.add('hidden');
+                }
+                
+                // Update group invitation count
+                const groupInvitationCount = document.getElementById('group-invitation-count');
+                if (data.group_invitations > 0) {
+                    groupInvitationCount.textContent = data.group_invitations;
+                    groupInvitationCount.classList.remove('hidden');
+                } else {
+                    groupInvitationCount.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notification counts:', error);
+            });
+    }
+
+    // Load counts on page load
+    loadNotificationCounts();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+</body>
+</html>

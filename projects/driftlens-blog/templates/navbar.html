@@ -1,0 +1,147 @@
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}" title="Messages">
+<i data-feather="message-circle" class="w-5 h-5"></i>
+<span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}" title="Groups">
+<i data-feather="users" class="w-5 h-5"></i>
+<span id="group-invitation-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}" title="Notifications">
+<i data-feather="bell" class="w-5 h-5"></i>
+<span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium" href="{{ url_for('profile') }}" title="Profile">
+<i data-feather="user" class="w-5 h-5"></i>
+</a>
+<button class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700" onclick="openModal('submitContent')">
+<i data-feather="plus" class="w-4 h-4 inline mr-1"></i>
+Submit
+</button>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">
+Logout
+</a>
+</div>
+<div class="md:hidden flex items-center">
+<button class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu"></i>
+</button>
+</div>
+</div>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" class="hidden md:hidden pb-4">
+<div class="space-y-2">
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('messages') }}">
+<i data-feather="message-circle" class="w-4 h-4 inline mr-2"></i>Messages
+<span id="message-count-mobile" class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('groups') }}">
+<i data-feather="users" class="w-4 h-4 inline mr-2"></i>Groups
+<span id="group-invitation-count-mobile" class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('notifications') }}">
+<i data-feather="bell" class="w-4 h-4 inline mr-2"></i>Notifications
+<span id="notification-count-mobile" class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('profile') }}">
+<i data-feather="user" class="w-4 h-4 inline mr-2"></i>Profile
+</a>
+<a class="block bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 text-center" href="{{ url_for('logout') }}">
+Logout
+</a>
+</div>
+</div>
+</div>
+</nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+
+// Load notification counts
+function loadNotificationCounts() {
+    fetch('/get_notification_counts')
+        .then(response => response.json())
+        .then(data => {
+            // Update desktop counts
+            const messageCount = document.getElementById('message-count');
+            if (data.messages > 0) {
+                messageCount.textContent = data.messages;
+                messageCount.classList.remove('hidden');
+            } else {
+                messageCount.classList.add('hidden');
+            }
+            
+            const notificationCount = document.getElementById('notification-count');
+            if (data.notifications > 0) {
+                notificationCount.textContent = data.notifications;
+                notificationCount.classList.remove('hidden');
+            } else {
+                notificationCount.classList.add('hidden');
+            }
+            
+            const groupInvitationCount = document.getElementById('group-invitation-count');
+            if (data.group_invitations > 0) {
+                groupInvitationCount.textContent = data.group_invitations;
+                groupInvitationCount.classList.remove('hidden');
+            } else {
+                groupInvitationCount.classList.add('hidden');
+            }
+
+            // Update mobile counts
+            const messageCountMobile = document.getElementById('message-count-mobile');
+            if (data.messages > 0 && messageCountMobile) {
+                messageCountMobile.textContent = data.messages;
+                messageCountMobile.classList.remove('hidden');
+            } else if (messageCountMobile) {
+                messageCountMobile.classList.add('hidden');
+            }
+
+            const notificationCountMobile = document.getElementById('notification-count-mobile');
+            if (data.notifications > 0 && notificationCountMobile) {
+                notificationCountMobile.textContent = data.notifications;
+                notificationCountMobile.classList.remove('hidden');
+            } else if (notificationCountMobile) {
+                notificationCountMobile.classList.add('hidden');
+            }
+
+            const groupInvitationCountMobile = document.getElementById('group-invitation-count-mobile');
+            if (data.group_invitations > 0 && groupInvitationCountMobile) {
+                groupInvitationCountMobile.textContent = data.group_invitations;
+                groupInvitationCountMobile.classList.remove('hidden');
+            } else if (groupInvitationCountMobile) {
+                groupInvitationCountMobile.classList.add('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading notification counts:', error);
+        });
+}
+
+// Load counts on page load and refresh every 30 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    loadNotificationCounts();
+    setInterval(loadNotificationCounts, 30000);
+});
+</script>
+

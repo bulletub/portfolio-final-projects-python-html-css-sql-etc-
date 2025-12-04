@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analytics Dashboard | DriftLens Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+</style>
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens Admin</span>
+</a>
+</div>
+<div class="flex items-center space-x-4">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('superadmin') }}">Dashboard</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('superadmin_users') }}">Users</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('superadmin_reports') }}">Reports</a>
+<a class="text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('superadmin_analytics') }}">Analytics</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">Logout</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Header -->
+<section class="hero-gradient text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h1 class="text-4xl md:text-5xl font-bold title-font mb-4">Analytics Dashboard</h1>
+<p class="text-lg md:text-xl opacity-90">Platform insights and statistics</p>
+</div>
+</section>
+
+<!-- Analytics Section -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<!-- Stats Grid -->
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-blue-100 rounded-full">
+<i class="w-6 h-6 text-blue-600" data-feather="users"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ total_users }}</h3>
+<p class="text-gray-600">Total Users</p>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-green-100 rounded-full">
+<i class="w-6 h-6 text-green-600" data-feather="user-check"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ active_users }}</h3>
+<p class="text-gray-600">Active Users</p>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-red-100 rounded-full">
+<i class="w-6 h-6 text-red-600" data-feather="user-x"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ suspended_users }}</h3>
+<p class="text-gray-600">Suspended Users</p>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-purple-100 rounded-full">
+<i class="w-6 h-6 text-purple-600" data-feather="file-text"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ total_posts }}</h3>
+<p class="text-gray-600">Total Posts</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-indigo-100 rounded-full">
+<i class="w-6 h-6 text-indigo-600" data-feather="users"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ total_groups }}</h3>
+<p class="text-gray-600">Total Groups</p>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-yellow-100 rounded-full">
+<i class="w-6 h-6 text-yellow-600" data-feather="flag"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ total_reports }}</h3>
+<p class="text-gray-600">Total Reports</p>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-orange-100 rounded-full">
+<i class="w-6 h-6 text-orange-600" data-feather="clock"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ pending_reports }}</h3>
+<p class="text-gray-600">Pending Reports</p>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-lg shadow-lg p-6 border">
+<div class="flex items-center">
+<div class="p-3 bg-pink-100 rounded-full">
+<i class="w-6 h-6 text-pink-600" data-feather="activity"></i>
+</div>
+<div class="ml-4">
+<h3 class="text-2xl font-bold text-gray-800">{{ (active_users / total_users * 100) | round(1) if total_users > 0 else 0 }}%</h3>
+<p class="text-gray-600">Active Rate</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Recent Activity -->
+<div class="grid lg:grid-cols-2 gap-8">
+<!-- Recent Posts -->
+<div class="bg-white rounded-lg shadow-lg p-6">
+<h2 class="text-xl font-bold title-font mb-6">Recent Posts</h2>
+{% if recent_posts %}
+<div class="space-y-4">
+{% for post in recent_posts %}
+<div class="border-l-4 border-blue-500 pl-4 py-2">
+<h4 class="font-semibold text-gray-800">{{ post.title }}</h4>
+                <p class="text-sm text-gray-600">By {{ post.user.email }} • {{ post.created_at|philippine_time('%B %d, %Y') }}</p>
+<p class="text-sm text-gray-500 mt-1">{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-8">
+<i class="w-12 h-12 text-gray-400 mx-auto mb-4" data-feather="file-text"></i>
+<p class="text-gray-500">No recent posts</p>
+</div>
+{% endif %}
+</div>
+
+<!-- Recent Reports -->
+<div class="bg-white rounded-lg shadow-lg p-6">
+<h2 class="text-xl font-bold title-font mb-6">Recent Reports</h2>
+{% if recent_reports %}
+<div class="space-y-4">
+{% for report in recent_reports %}
+<div class="border-l-4 {% if report.status == 'pending' %}border-yellow-500{% elif report.status == 'resolved' %}border-green-500{% else %}border-gray-500{% endif %} pl-4 py-2">
+<h4 class="font-semibold text-gray-800">Report #{{ report.id }}</h4>
+                <p class="text-sm text-gray-600">{{ report.reason }} • {{ report.created_at|philippine_time('%B %d, %Y') }}</p>
+<p class="text-sm text-gray-500 mt-1">Reporter: {{ report.reporter.email }} | Reported: {{ report.reported_user.email }}</p>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-8">
+<i class="w-12 h-12 text-gray-400 mx-auto mb-4" data-feather="flag"></i>
+<p class="text-gray-500">No recent reports</p>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
+</section>
+
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+</body>
+</html>

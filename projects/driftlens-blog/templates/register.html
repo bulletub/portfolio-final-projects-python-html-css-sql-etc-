@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Register | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #F8F1F1;
+    }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .auth-bg {
+      background: linear-gradient(135deg, #16C79A 0%, #19456B 100%);
+    }
+    .auth-card {
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    }
+    .password-strength {
+      height: 4px;
+      transition: all 0.3s ease;
+    }
+  </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+<link href="/static/css/styles.css" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+</head>
+<body>
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="flex items-center">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">
+<i data-feather="arrow-left" class="w-4 h-4 inline mr-2"></i>Back to Home
+</a>
+</div>
+</div>
+</div>
+</nav>
+<!-- Auth Section -->
+<section class="min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-md">
+<div class="bg-white rounded-lg auth-card overflow-hidden">
+<div class="auth-bg text-white p-6 text-center">
+<h1 class="text-3xl font-bold title-font">Join DriftLens</h1>
+<p class="opacity-90 mt-2">Create your free account</p>
+</div>
+<div class="p-8">
+<form action="{{ url_for('register') }}" class="space-y-6" id="registerForm" method="POST">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1" for="fullName">Full Name</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="fullName" name="fullName" placeholder="John Doe" required="" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1" for="email">Email</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="email" name="email" placeholder="your@email.com" required="" type="email"/>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1" for="password">Password</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="password" name="password" oninput="checkPasswordStrength(this.value)" placeholder="••••••••" required="" type="password"/>
+<div class="grid grid-cols-4 gap-1 mt-2">
+<div class="password-strength bg-gray-200 rounded" id="strength1"></div>
+<div class="password-strength bg-gray-200 rounded" id="strength2"></div>
+<div class="password-strength bg-gray-200 rounded" id="strength3"></div>
+<div class="password-strength bg-gray-200 rounded" id="strength4"></div>
+</div>
+<p class="text-xs text-gray-500 mt-1" id="passwordHelp">Use 8+ characters with a mix of letters, numbers &amp; symbols</p>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1" for="confirmPassword">Confirm Password</label>
+<input class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required="" type="password"/>
+</div>
+<div class="flex items-start">
+<div class="flex items-center h-5">
+<input class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" id="terms" required="" type="checkbox"/>
+</div>
+<div class="ml-3 text-sm">
+<label class="font-medium text-gray-700" for="terms">I agree to the <a class="text-blue-600 hover:underline" href="#">Terms of Service</a> and <a class="text-blue-600 hover:underline" href="#">Privacy Policy</a></label>
+</div>
+</div>
+<button class="w-full bg-green-600 text-white py-3 px-4 rounded-md font-medium hover:bg-green-700 transition duration-300 flex items-center justify-center" type="submit">
+<span>Create Account</span>
+<i class="ml-2 w-5 h-5" data-feather="arrow-right"></i>
+</button>
+</form>
+<div class="mt-6 text-center">
+<p class="text-sm text-gray-600">
+  Already have an account? 
+  <a class="font-medium text-blue-600 hover:text-blue-500 hover:underline" href="{{ url_for('login') }}">Sign in</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<script>
+    feather.replace();
+    
+    function checkPasswordStrength(password) {
+      const strength1 = document.getElementById('strength1');
+      const strength2 = document.getElementById('strength2');
+      const strength3 = document.getElementById('strength3');
+      const strength4 = document.getElementById('strength4');
+      const passwordHelp = document.getElementById('passwordHelp');
+      
+      // Reset all
+      [strength1, strength2, strength3, strength4].forEach(el => {
+        el.className = 'password-strength bg-gray-200 rounded';
+      });
+      
+      if (password.length === 0) {
+        passwordHelp.textContent = 'Use 8+ characters with a mix of letters, numbers & symbols';
+        return;
+      }
+      
+      if (password.length < 4) {
+        strength1.className = 'password-strength bg-red-500 rounded';
+        passwordHelp.textContent = 'Too short';
+        return;
+      }
+      
+      if (password.length < 8) {
+        strength1.className = 'password-strength bg-yellow-500 rounded';
+        strength2.className = 'password-strength bg-yellow-500 rounded';
+        passwordHelp.textContent = 'Fair';
+        return;
+      }
+      
+      // Check for complexity
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumbers = /\d/.test(password);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      
+      let strength = 0;
+      if (hasUpperCase) strength++;
+      if (hasLowerCase) strength++;
+      if (hasNumbers) strength++;
+      if (hasSpecial) strength++;
+      
+      if (strength < 2) {
+        strength1.className = 'password-strength bg-yellow-500 rounded';
+        strength2.className = 'password-strength bg-yellow-500 rounded';
+        passwordHelp.textContent = 'Good - try adding numbers or symbols';
+      } else if (strength < 4) {
+        strength1.className = 'password-strength bg-blue-500 rounded';
+        strength2.className = 'password-strength bg-blue-500 rounded';
+        strength3.className = 'password-strength bg-blue-500 rounded';
+        passwordHelp.textContent = 'Strong';
+      } else {
+        strength1.className = 'password-strength bg-green-500 rounded';
+        strength2.className = 'password-strength bg-green-500 rounded';
+        strength3.className = 'password-strength bg-green-500 rounded';
+        strength4.className = 'password-strength bg-green-500 rounded';
+        passwordHelp.textContent = 'Very strong!';
+      }
+    };
+  </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+</body>
+</html>

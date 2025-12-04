@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Conversation with {{ other_user.email }} | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+<link href="/static/css/styles.css" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">Home</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='photography') }}">Photography</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='travel') }}">Travel</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('category_posts', category='adventure') }}">Adventure</a>
+<a class="text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}" title="Messages">
+<i data-feather="message-circle" class="w-5 h-5"></i>
+<span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}" title="Groups">
+<i data-feather="users" class="w-5 h-5"></i>
+<span id="group-invitation-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}" title="Notifications">
+<i data-feather="bell" class="w-5 h-5"></i>
+<span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-2 py-2 text-sm font-medium" href="{{ url_for('profile') }}" title="Profile">
+<i data-feather="user" class="w-5 h-5"></i>
+</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">
+Logout
+</a>
+</div>
+<!-- Mobile menu button -->
+<div class="md:hidden flex items-center space-x-2">
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+  <i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='photography') }}">
+  <i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='travel') }}">
+  <i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='adventure') }}">
+  <i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<a class="block text-blue-600 bg-gray-100 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('messages') }}">
+  <i data-feather="message-circle" class="w-4 h-4 inline mr-2"></i>Messages
+  <span id="mobile-message-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('groups') }}">
+  <i data-feather="users" class="w-4 h-4 inline mr-2"></i>Groups
+  <span id="mobile-group-invitation-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('notifications') }}">
+  <i data-feather="bell" class="w-4 h-4 inline mr-2"></i>Notifications
+  <span id="mobile-notification-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('profile') }}">
+  <i data-feather="user" class="w-4 h-4 inline mr-2"></i>Profile
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-red-500 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 text-center" href="{{ url_for('logout') }}">
+  <i data-feather="log-out" class="w-4 h-4 inline mr-2"></i>Logout
+</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Chat Header -->
+<section class="bg-white border-b py-4">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center">
+<span class="text-lg font-semibold text-gray-600">{{ other_user.email[0].upper() }}</span>
+</div>
+<div>
+<h1 class="text-xl font-bold text-gray-800">{{ other_user.email.split('@')[0] }}</h1>
+<p class="text-sm text-gray-500">{{ other_user.email }}</p>
+</div>
+<div class="ml-auto">
+<button onclick="reportUser({{ other_user.id }})" class="px-4 py-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition duration-300">
+<i class="w-4 h-4 mr-2" data-feather="flag"></i>
+Report User
+</button>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Messages Container -->
+<section class="py-8 bg-gray-50 min-h-screen">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="bg-white rounded-lg shadow-lg overflow-hidden">
+<!-- Messages -->
+<div id="messagesContainer" class="h-96 overflow-y-auto p-6 space-y-4">
+{% for message in messages %}
+<div class="flex {% if message.sender_id == current_user.id %}justify-end{% else %}justify-start{% endif %}">
+<div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg {% if message.sender_id == current_user.id %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-800{% endif %}">
+<p class="text-sm">{{ message.content }}</p>
+                <p class="text-xs mt-1 opacity-75">{{ message.created_at|philippine_time('%I:%M %p') }}</p>
+</div>
+</div>
+{% endfor %}
+{% if not messages %}
+<div class="text-center py-8">
+<i class="w-12 h-12 text-gray-400 mx-auto mb-4" data-feather="message-circle"></i>
+<p class="text-gray-500">No messages yet</p>
+<p class="text-sm text-gray-400">Start the conversation!</p>
+</div>
+{% endif %}
+</div>
+
+<!-- Message Input -->
+<div class="border-t p-4">
+<form id="messageForm" class="flex space-x-4">
+<input type="text" id="messageInput" placeholder="Type your message..." class="flex-1 px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+<button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300">
+<i class="w-5 h-5" data-feather="send"></i>
+</button>
+</form>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Report User Modal -->
+<div class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50" id="reportModal">
+<div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+<button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" onclick="closeReportModal()">
+<i data-feather="x"></i>
+</button>
+<h2 class="text-xl font-bold mb-4">Report User</h2>
+<form action="{{ url_for('report_user', user_id=other_user.id) }}" method="POST">
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-2">Reason</label>
+<select name="reason" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+<option value="">Select a reason</option>
+<option value="spam">Spam</option>
+<option value="harassment">Harassment</option>
+<option value="inappropriate_content">Inappropriate Content</option>
+<option value="fake_profile">Fake Profile</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div class="mb-4">
+<label class="block text-gray-700 font-medium mb-2">Description (optional)</label>
+<textarea name="description" class="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Provide additional details..."></textarea>
+</div>
+<div class="flex justify-end space-x-4">
+<button type="button" onclick="closeReportModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+Cancel
+</button>
+<button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+Report User
+</button>
+</div>
+</form>
+</div>
+</div>
+
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+
+    // Auto-scroll to bottom of messages
+    function scrollToBottom() {
+        const container = document.getElementById('messagesContainer');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // Send message
+    document.getElementById('messageForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
+        
+        if (!content) return;
+
+        fetch('/send_message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                recipient_id: {{ other_user.id }},
+                content: content
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                // Add message to UI
+                const messagesContainer = document.getElementById('messagesContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'flex justify-end';
+                messageDiv.innerHTML = `
+                    <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg bg-blue-600 text-white">
+                        <p class="text-sm">${content}</p>
+                        <p class="text-xs mt-1 opacity-75">Just now</p>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+                messageInput.value = '';
+                scrollToBottom();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error sending message');
+        });
+    });
+
+    function reportUser(userId) {
+        document.getElementById('reportModal').classList.remove('hidden');
+    }
+
+    function closeReportModal() {
+        document.getElementById('reportModal').classList.add('hidden');
+    }
+
+    // Scroll to bottom on page load
+    scrollToBottom();
+
+    // Load notification counts
+    function loadNotificationCounts() {
+        fetch('/get_notification_counts')
+            .then(response => response.json())
+            .then(data => {
+                // Update desktop message count
+                const messageCount = document.getElementById('message-count');
+                const mobileMessageCount = document.getElementById('mobile-message-count');
+                if (data.messages > 0) {
+                    if (messageCount) {
+                        messageCount.textContent = data.messages;
+                        messageCount.classList.remove('hidden');
+                    }
+                    if (mobileMessageCount) {
+                        mobileMessageCount.textContent = data.messages;
+                        mobileMessageCount.classList.remove('hidden');
+                    }
+                } else {
+                    if (messageCount) messageCount.classList.add('hidden');
+                    if (mobileMessageCount) mobileMessageCount.classList.add('hidden');
+                }
+                
+                // Update notification count
+                const notificationCount = document.getElementById('notification-count');
+                const mobileNotificationCount = document.getElementById('mobile-notification-count');
+                if (data.notifications > 0) {
+                    if (notificationCount) {
+                        notificationCount.textContent = data.notifications;
+                        notificationCount.classList.remove('hidden');
+                    }
+                    if (mobileNotificationCount) {
+                        mobileNotificationCount.textContent = data.notifications;
+                        mobileNotificationCount.classList.remove('hidden');
+                    }
+                } else {
+                    if (notificationCount) notificationCount.classList.add('hidden');
+                    if (mobileNotificationCount) mobileNotificationCount.classList.add('hidden');
+                }
+                
+                // Update group invitation count
+                const groupInvitationCount = document.getElementById('group-invitation-count');
+                const mobileGroupInvitationCount = document.getElementById('mobile-group-invitation-count');
+                if (data.group_invitations > 0) {
+                    if (groupInvitationCount) {
+                        groupInvitationCount.textContent = data.group_invitations;
+                        groupInvitationCount.classList.remove('hidden');
+                    }
+                    if (mobileGroupInvitationCount) {
+                        mobileGroupInvitationCount.textContent = data.group_invitations;
+                        mobileGroupInvitationCount.classList.remove('hidden');
+                    }
+                } else {
+                    if (groupInvitationCount) groupInvitationCount.classList.add('hidden');
+                    if (mobileGroupInvitationCount) mobileGroupInvitationCount.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notification counts:', error);
+            });
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+        
+        if (menu && menuIcon && closeIcon) {
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                menu.classList.add('animate-slideDown');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+                menu.classList.remove('animate-slideDown');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+            feather.replace();
+        }
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('mobile-menu');
+        const button = document.getElementById('mobile-menu-button');
+        if (menu && button && !menu.contains(e.target) && !button.contains(e.target) && !menu.classList.contains('hidden')) {
+            toggleMobileMenu();
+        }
+    });
+
+    // Load counts on page load and refresh every 30 seconds
+    loadNotificationCounts();
+    setInterval(loadNotificationCounts, 30000);
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+</body>
+</html>

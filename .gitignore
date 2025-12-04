@@ -28,3 +28,21 @@ build/
 *.tmp
 .cache/
 
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Project-specific
+projects/*/venv/
+projects/*/__pycache__/
+projects/*/*.db
+projects/*/instance/
+

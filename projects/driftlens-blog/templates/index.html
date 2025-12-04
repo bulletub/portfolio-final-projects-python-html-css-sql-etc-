@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DriftLens | Photography, Travel &amp; Adventure Blog</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<!-- Inline CSS -->
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #F8F1F1;
+    }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+    .category-photography { background-color: #11698E; }
+    .category-travel { background-color: #19456B; }
+    .category-adventure { background-color: #16C79A; }
+    .blog-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),
+                  0 10px 10px -5px rgba(0,0,0,0.04);
+    }
+    .footer-bg { background-color: #19456B; }
+    .modal-bg {
+      background: rgba(0,0,0,0.6);
+    }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-slideDown {
+      animation: slideDown 0.3s ease-out;
+    }
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .hero-gradient h1 {
+        font-size: 2rem;
+      }
+      .blog-card {
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet"/>
+<link href="/static/css/styles.css" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+</head>
+<body class="text-gray-800">
+<!-- Navigation -->
+<nav class="bg-white shadow-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="#">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-6">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('index') }}">
+  <i data-feather="home" class="w-4 h-4 inline mr-1"></i>Home
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('guest_category_posts', category='photography') }}">
+  <i data-feather="camera" class="w-4 h-4 inline mr-1"></i>Photography
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('guest_category_posts', category='travel') }}">
+  <i data-feather="map" class="w-4 h-4 inline mr-1"></i>Travel
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('guest_category_posts', category='adventure') }}">
+  <i data-feather="compass" class="w-4 h-4 inline mr-1"></i>Adventure
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium" href="{{ url_for('guest_explore') }}">
+  <i data-feather="search" class="w-4 h-4 inline mr-1"></i>Explore
+</a>
+<a class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700" href="{{ url_for('login') }}">
+  Login
+</a>
+<a class="border border-blue-600 text-blue-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50" href="{{ url_for('register') }}">
+  Sign Up
+</a>
+</div>
+<div class="md:hidden flex items-center">
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+  <i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_category_posts', category='photography') }}">
+  <i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_category_posts', category='travel') }}">
+  <i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_category_posts', category='adventure') }}">
+  <i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('guest_explore') }}">
+  <i data-feather="search" class="w-4 h-4 inline mr-2"></i>Explore
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-blue-600 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-blue-700 text-center" href="{{ url_for('login') }}">
+  Login
+</a>
+<a class="block border border-blue-600 text-blue-600 px-3 py-2 rounded-md text-base font-medium hover:bg-blue-50 text-center mt-2" href="{{ url_for('register') }}">
+  Sign Up
+</a>
+</div>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="hero-gradient text-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+<div class="md:flex md:items-center md:justify-between">
+<div class="md:w-1/2" data-aos="fade-right">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold title-font mb-6">
+            Capture the World Through Our Lens
+          </h1>
+<p class="text-lg md:text-xl mb-8 opacity-90">
+            Discover breathtaking photography, travel guides, and thrilling adventures from around the globe.
+          </p>
+<div class="flex space-x-4">
+<a class="bg-white text-blue-600 px-6 py-3 rounded-md text-lg font-medium hover:bg-gray-100 transition duration-300" href="{{ url_for('guest_explore') }}">
+  <i data-feather="compass" class="inline-block w-5 h-5 mr-2"></i>Explore
+</a>
+<a class="border-2 border-white text-white px-6 py-3 rounded-md text-lg font-medium hover:bg-white hover:text-blue-600 transition duration-300" href="{{ url_for('register') }}">
+  <i data-feather="user-plus" class="inline-block w-5 h-5 mr-2"></i>Join Now
+</a>
+</div>
+</div>
+<div class="hidden md:block md:w-1/2" data-aos="fade-left">
+<img alt="Travel" class="rounded-lg shadow-xl" src="http://static.photos/travel/1024x576/1"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Posts -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-4">Featured Stories</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Our most popular and inspiring posts from all categories</p>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<!-- Featured Post 1 -->
+<div class="bg-white rounded-lg overflow-hidden shadow-md blog-card transition duration-300" data-aos="fade-up">
+<div class="relative">
+<img alt="Featured post" class="w-full h-48 object-cover" src="http://static.photos/nature/640x360/5"/>
+<span class="absolute top-4 right-4 bg-white text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">Photography</span>
+</div>
+<div class="p-6">
+<div class="flex items-center text-sm text-gray-500 mb-2">
+<span>June 12, 2023</span>
+<span class="mx-2">•</span>
+<span>5 min read</span>
+</div>
+<h3 class="text-xl font-bold mb-3">The Art of Landscape Photography</h3>
+<p class="text-gray-600 mb-4">Learn how to capture stunning landscapes with these professional techniques and tips.</p>
+<a class="text-blue-600 font-medium flex items-center hover:text-blue-800" href="#">
+                            Read More
+                            <i class="ml-2 w-4 h-4" data-feather="arrow-right"></i>
+</a>
+</div>
+</div>
+<!-- Featured Post 2 -->
+<div class="bg-white rounded-lg overflow-hidden shadow-md blog-card transition duration-300" data-aos="fade-up" data-aos-delay="100">
+<div class="relative">
+<img alt="Featured post" class="w-full h-48 object-cover" src="http://static.photos/travel/640x360/7"/>
+<span class="absolute top-4 right-4 bg-white text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">Travel</span>
+</div>
+<div class="p-6">
+<div class="flex items-center text-sm text-gray-500 mb-2">
+<span>May 28, 2023</span>
+<span class="mx-2">•</span>
+<span>8 min read</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Hidden Gems of Southeast Asia</h3>
+<p class="text-gray-600 mb-4">Discover the less traveled paths and authentic experiences in Southeast Asia's most beautiful locations.</p>
+<a class="text-blue-600 font-medium flex items-center hover:text-blue-800" href="#">
+                            Read More
+                            <i class="ml-2 w-4 h-4" data-feather="arrow-right"></i>
+</a>
+</div>
+</div>
+<!-- Featured Post 3 -->
+<div class="bg-white rounded-lg overflow-hidden shadow-md blog-card transition duration-300" data-aos="fade-up" data-aos-delay="200">
+<div class="relative">
+<img alt="Featured post" class="w-full h-48 object-cover" src="http://static.photos/adventure/640x360/9"/>
+<span class="absolute top-4 right-4 bg-white text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">Adventure</span>
+</div>
+<div class="p-6">
+<div class="flex items-center text-sm text-gray-500 mb-2">
+<span>May 15, 2023</span>
+<span class="mx-2">•</span>
+<span>6 min read</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Mountain Biking in the Swiss Alps</h3>
+<p class="text-gray-600 mb-4">Our thrilling experience biking through some of the most challenging trails in the Swiss Alps.</p>
+<a class="text-blue-600 font-medium flex items-center hover:text-blue-800" href="#">
+                            Read More
+                            <i class="ml-2 w-4 h-4" data-feather="arrow-right"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="text-center mt-12">
+<a class="inline-flex items-center px-6 py-3 border border-transparent text-lg font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-300" href="#">
+                    View All Posts
+                    <i class="ml-2 w-5 h-5" data-feather="arrow-right"></i>
+</a>
+</div>
+</div>
+</section>
+<!-- Categories Section -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-4">Explore Our Categories</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Dive into our curated collections of stories and images</p>
+</div>
+<div class="grid md:grid-cols-3 gap-6">
+<!-- Photography Category -->
+<a class="category-photography rounded-lg overflow-hidden shadow-lg text-white" data-aos="zoom-in" href="{{ url_for('guest_category_posts', category='photography') }}" id="photography">
+<div class="relative h-64">
+<img alt="Photography" class="w-full h-full object-cover opacity-80" src="http://static.photos/photography/640x360/2"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center p-6">
+<h3 class="text-2xl font-bold title-font mb-2">Photography</h3>
+<p class="opacity-90 mb-4">Stunning visual stories from around the world</p>
+<span class="inline-block px-4 py-2 bg-white text-blue-600 rounded-full text-sm font-semibold">View Collection</span>
+</div>
+</div>
+</div>
+</a>
+<!-- Travel Category -->
+<a class="category-travel rounded-lg overflow-hidden shadow-lg text-white" data-aos="zoom-in" data-aos-delay="100" href="{{ url_for('guest_category_posts', category='travel') }}" id="travel">
+<div class="relative h-64">
+<img alt="Travel" class="w-full h-full object-cover opacity-80" src="http://static.photos/travel/640x360/3"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center p-6">
+<h3 class="text-2xl font-bold title-font mb-2">Travel</h3>
+<p class="opacity-90 mb-4">Guides, tips and personal experiences</p>
+<span class="inline-block px-4 py-2 bg-white text-blue-600 rounded-full text-sm font-semibold">View Collection</span>
+</div>
+</div>
+</div>
+</a>
+<!-- Adventure Category -->
+<a class="category-adventure rounded-lg overflow-hidden shadow-lg text-white" data-aos="zoom-in" data-aos-delay="200" href="{{ url_for('guest_category_posts', category='adventure') }}" id="adventure">
+<div class="relative h-64">
+<img alt="Adventure" class="w-full h-full object-cover opacity-80" src="http://static.photos/adventure/640x360/4"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="text-center p-6">
+<h3 class="text-2xl font-bold title-font mb-2">Adventure</h3>
+<p class="opacity-90 mb-4">Thrilling experiences and outdoor activities</p>
+<span class="inline-block px-4 py-2 bg-white text-green-600 rounded-full text-sm font-semibold">View Collection</span>
+</div>
+</div>
+</div>
+</a>
+</div>
+</div>
+</section>
+<!-- Latest Posts -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col md:flex-row justify-between items-center mb-12">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">Latest Posts</h2>
+<p class="text-gray-600">Stay updated with our newest content</p>
+</div>
+<div class="mt-4 md:mt-0">
+<div class="flex items-center space-x-2">
+<button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium">All</button>
+<button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300">Photography</button>
+<button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300">Travel</button>
+<button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300">Adventure</button>
+</div>
+</div>
+</div>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+{% if recent_posts %}
+  {% for post in recent_posts %}
+  <div class="bg-white rounded-lg overflow-hidden shadow-md blog-card transition duration-300 cursor-pointer" data-aos="fade-up" onclick="openModal()">
+    <div class="relative">
+      {% if post.content_type in ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'] %}
+        <img alt="{{ post.title }}" class="w-full h-48 object-cover" src="{{ url_for('uploaded_file', filename=post.file_path) }}"/>
+      {% elif post.content_type in ['video/mp4', 'video/webm', 'video/ogg'] %}
+        <video class="w-full h-48 object-cover">
+          <source src="{{ url_for('uploaded_file', filename=post.file_path) }}" type="{{ post.content_type }}">
+        </video>
+        <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+          <i data-feather="play-circle" class="w-12 h-12 text-white"></i>
+        </div>
+      {% else %}
+        <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+          <i data-feather="file" class="w-12 h-12 text-white"></i>
+        </div>
+      {% endif %}
+      <span class="absolute top-4 right-4 bg-white text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">{{ post.category.title() }}</span>
+      <!-- Login overlay -->
+      <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition duration-300 flex items-center justify-center">
+        <div class="opacity-0 hover:opacity-100 transition duration-300">
+          <span class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">
+            <i data-feather="lock" class="w-4 h-4 inline mr-1"></i>Login to View
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="p-6">
+      <div class="flex items-center text-sm text-gray-500 mb-2">
+        <i data-feather="calendar" class="w-4 h-4 mr-1"></i>
+        <span>{{ post.created_at.strftime('%B %d, %Y') if post.created_at else 'Recently' }}</span>
+        <span class="mx-2">•</span>
+        <i data-feather="eye" class="w-4 h-4 mr-1"></i>
+        <span>{{ post.views }} views</span>
+      </div>
+      <h3 class="text-xl font-bold mb-3">{{ post.title }}</h3>
+      <p class="text-gray-600 mb-4 line-clamp-2">{{ post.description[:100] }}...</p>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3 text-sm text-gray-500">
+          <span class="flex items-center">
+            <i data-feather="heart" class="w-4 h-4 mr-1"></i>{{ post.likes }}
+          </span>
+          <span class="flex items-center">
+            <i data-feather="message-circle" class="w-4 h-4 mr-1"></i>{{ post.comments.count() }}
+          </span>
+        </div>
+        <span class="text-blue-600 font-medium text-sm">Read More →</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <!-- Static fallback if no posts -->
+  <div class="col-span-3 text-center py-12">
+    <i data-feather="inbox" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+    <h3 class="text-2xl font-bold text-gray-700 mb-2">No Posts Yet</h3>
+    <p class="text-gray-500 mb-6">Be the first to share your story!</p>
+    <a href="{{ url_for('register') }}" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+      Sign Up to Post
+    </a>
+  </div>
+{% endif %}
+</div>
+<div class="text-center mt-12">
+<a class="inline-flex items-center px-6 py-3 border border-blue-600 text-lg font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition duration-300" href="{{ url_for('guest_explore') }}">
+                    Explore More
+                    <i class="ml-2 w-5 h-5" data-feather="compass"></i>
+</a>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="footer-bg text-white py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<div>
+<h3 class="text-lg font-bold title-font mb-4">DriftLens</h3>
+<p class="text-gray-300 mb-4">Capturing the world through stories and lenses.</p>
+<div class="flex space-x-4">
+<a class="text-gray-300 hover:text-white" href="#">
+<i class="w-5 h-5" data-feather="instagram"></i>
+</a>
+<a class="text-gray-300 hover:text-white" href="#">
+<i class="w-5 h-5" data-feather="twitter"></i>
+</a>
+<a class="text-gray-300 hover:text-white" href="#">
+<i class="w-5 h-5" data-feather="facebook"></i>
+</a>
+<a class="text-gray-300 hover:text-white" href="#">
+<i class="w-5 h-5" data-feather="youtube"></i>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-lg font-semibold mb-4">Categories</h3>
+<ul class="space-y-2">
+<li><a class="text-gray-300 hover:text-white" href="{{ url_for('guest_category_posts', category='photography') }}">Photography</a></li>
+<li><a class="text-gray-300 hover:text-white" href="{{ url_for('guest_category_posts', category='travel') }}">Travel</a></li>
+<li><a class="text-gray-300 hover:text-white" href="{{ url_for('guest_category_posts', category='adventure') }}">Adventure</a></li>
+<li><a class="text-gray-300 hover:text-white" href="{{ url_for('guest_explore') }}">Explore</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-lg font-semibold mb-4">Company</h3>
+<ul class="space-y-2">
+<li><a class="text-gray-300 hover:text-white" href="#">About Us</a></li>
+<li><a class="text-gray-300 hover:text-white" href="#">Our Team</a></li>
+<li><a class="text-gray-300 hover:text-white" href="#">Careers</a></li>
+<li><a class="text-gray-300 hover:text-white" href="#">Contact</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-lg font-semibold mb-4">Legal</h3>
+<ul class="space-y-2">
+<li><a class="text-gray-300 hover:text-white" href="#">Privacy Policy</a></li>
+<li><a class="text-gray-300 hover:text-white" href="#">Terms of Service</a></li>
+<li><a class="text-gray-300 hover:text-white" href="#">Cookie Policy</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+<p class="text-gray-400 text-sm">© 2023 WanderLens. All rights reserved.</p>
+<div class="mt-4 md:mt-0">
+<a class="text-gray-400 hover:text-white text-sm mr-4" href="#">Privacy Policy</a>
+<a class="text-gray-400 hover:text-white text-sm mr-4" href="#">Terms</a>
+<a class="text-gray-400 hover:text-white text-sm" href="#">Contact</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- Login/Register Modal -->
+<div class="fixed inset-0 hidden items-center justify-center modal-bg z-50" id="authModal">
+<div class="bg-white rounded-lg shadow-lg w-full max-w-md p-8 relative">
+<button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" onclick="closeModal()">
+<i data-feather="x"></i>
+</button>
+<div class="text-center">
+  <div class="flex items-center justify-center w-16 h-16 mx-auto bg-blue-100 rounded-full mb-4">
+    <i data-feather="lock" class="w-8 h-8 text-blue-600"></i>
+  </div>
+  <h3 class="text-2xl font-bold text-gray-900 mb-4">Login Required</h3>
+  <p class="text-gray-600 mb-6">Please log in to view full posts and interact with the community.</p>
+  <div class="flex flex-col space-y-3">
+    <a href="{{ url_for('login') }}" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-300">
+      Login
+    </a>
+    <a href="{{ url_for('register') }}" class="w-full border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition duration-300">
+      Create Account
+    </a>
+    <button onclick="closeModal()" class="w-full text-gray-600 hover:text-gray-800 font-medium">
+      Continue Browsing
+    </button>
+  </div>
+</div>
+</div>
+</div>
+<!-- Scripts -->
+<script>
+    AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+    feather.replace();
+
+    function openModal() {
+      document.getElementById('authModal').classList.remove('hidden');
+      document.getElementById('authModal').classList.add('flex');
+    }
+    
+    function closeModal() {
+      document.getElementById('authModal').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('flex');
+    }
+    
+    // Close modal on outside click
+    document.getElementById('authModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+  </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.AOS) AOS.init();
+    if (window.feather) feather.replace();
+  });
+</script>
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+</body>
+</html>

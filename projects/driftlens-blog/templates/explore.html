@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Explore | DriftLens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+<link href="{{ url_for('static', filename='css/splash.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/responsive.css') }}" rel="stylesheet"/>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+    body { font-family: 'Montserrat', sans-serif; background-color: #F8F1F1; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    .hero-gradient { background: linear-gradient(135deg, #11698E 0%, #19456B 100%); }
+    .category-photography { background-color: #11698E; }
+    .category-travel { background-color: #19456B; }
+    .category-adventure { background-color: #16C79A; }
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-5px); }
+</style>
+</head>
+<body class="text-gray-800">
+
+<!-- Navigation -->
+<nav class="bg-white shadow-sm sticky top-0 z-40">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16">
+<div class="flex items-center">
+<a class="flex items-center" href="{{ url_for('index') }}">
+<span class="text-2xl font-bold title-font" style="color: #19456B;">DriftLens</span>
+</a>
+</div>
+<div class="hidden md:flex items-center space-x-4">
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('index') }}">
+  <i data-feather="home" class="inline-block w-4 h-4 mr-1"></i>
+  Home
+</a>
+<a class="text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('explore') }}">
+  <i data-feather="compass" class="inline-block w-4 h-4 mr-1"></i>
+  Explore
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('messages') }}">
+  <i data-feather="message-circle" class="inline-block w-4 h-4 mr-1"></i>
+  Messages
+  <span id="message-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('groups') }}">
+  <i data-feather="users" class="inline-block w-4 h-4 mr-1"></i>
+  Groups
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('notifications') }}">
+  <i data-feather="bell" class="inline-block w-4 h-4 mr-1"></i>
+  Notifications
+  <span id="notification-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium relative" href="{{ url_for('profile') }}">
+  <i data-feather="user" class="inline-block w-4 h-4 mr-1"></i>
+  Profile
+</a>
+<a class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600" href="{{ url_for('logout') }}">
+  <i data-feather="log-out" class="inline-block w-4 h-4 mr-1"></i>
+  Logout
+</a>
+</div>
+<!-- Mobile menu button -->
+<div class="md:hidden flex items-center space-x-2">
+<button id="mobile-menu-button" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100" type="button" onclick="toggleMobileMenu()">
+<i data-feather="menu" id="menu-icon"></i>
+<i data-feather="x" id="close-icon" class="hidden"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+<div class="px-2 pt-2 pb-3 space-y-1">
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('index') }}">
+<i data-feather="home" class="w-4 h-4 inline mr-2"></i>Home
+</a>
+<a class="block text-blue-600 bg-gray-100 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('explore') }}">
+<i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Explore
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='photography') }}">
+<i data-feather="camera" class="w-4 h-4 inline mr-2"></i>Photography
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='travel') }}">
+<i data-feather="map" class="w-4 h-4 inline mr-2"></i>Travel
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('category_posts', category='adventure') }}">
+<i data-feather="compass" class="w-4 h-4 inline mr-2"></i>Adventure
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('messages') }}">
+<i data-feather="message-circle" class="w-4 h-4 inline mr-2"></i>Messages
+<span id="mobile-message-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('groups') }}">
+<i data-feather="users" class="w-4 h-4 inline mr-2"></i>Groups
+<span id="mobile-group-invitation-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium relative" href="{{ url_for('notifications') }}">
+<i data-feather="bell" class="w-4 h-4 inline mr-2"></i>Notifications
+<span id="mobile-notification-count" class="absolute top-2 left-8 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+</a>
+<a class="block text-gray-700 hover:bg-gray-100 hover:text-blue-600 px-3 py-2 rounded-md text-base font-medium" href="{{ url_for('profile') }}">
+<i data-feather="user" class="w-4 h-4 inline mr-2"></i>Profile
+</a>
+<div class="border-t border-gray-200 my-2"></div>
+<a class="block bg-red-500 text-white px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 text-center" href="{{ url_for('logout') }}">
+<i data-feather="log-out" class="w-4 h-4 inline mr-2"></i>Logout
+</a>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-gradient text-white py-16">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<div data-aos="fade-down">
+<i data-feather="compass" class="w-16 h-16 mx-auto mb-4"></i>
+<h1 class="text-4xl md:text-5xl font-bold title-font mb-4">Explore DriftLens</h1>
+<p class="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">Discover trending content, top creators, and amazing stories from our community</p>
+</div>
+</div>
+</section>
+
+<!-- Quick Stats -->
+<section class="py-12 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up">
+<i data-feather="image" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ trending_posts|length }}</h3>
+<p class="text-sm opacity-90">Trending Posts</p>
+</div>
+<div class="stat-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up" data-aos-delay="100">
+<i data-feather="users" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ top_creators|length }}</h3>
+<p class="text-sm opacity-90">Top Creators</p>
+</div>
+<div class="stat-card bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up" data-aos-delay="200">
+<i data-feather="layers" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ category_stats|length }}</h3>
+<p class="text-sm opacity-90">Categories</p>
+</div>
+<div class="stat-card bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-6 text-white text-center shadow-lg" data-aos="fade-up" data-aos-delay="300">
+<i data-feather="users" class="w-8 h-8 mx-auto mb-2"></i>
+<h3 class="text-3xl font-bold">{{ active_groups|length }}</h3>
+<p class="text-sm opacity-90">Active Groups</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Trending Posts -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">
+  <i data-feather="trending-up" class="inline-block w-8 h-8 text-red-500"></i>
+  Trending Now
+</h2>
+<p class="text-gray-600">Most viewed posts in the last 7 days</p>
+</div>
+</div>
+
+{% if trending_posts %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+{% for post in trending_posts %}
+<a href="{{ url_for('view_post', post_id=post.id) }}" class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1" data-aos="fade-up">
+<div class="relative">
+{% if post.content_type == 'image' %}
+  <img src="{{ url_for('uploaded_file', filename=post.file_path) }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+{% elif post.content_type == 'video' %}
+  <video src="{{ url_for('uploaded_file', filename=post.file_path) }}" class="w-full h-48 object-cover"></video>
+{% else %}
+  <div class="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+    <i data-feather="file-text" class="w-12 h-12 text-white"></i>
+  </div>
+{% endif %}
+<span class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
+  <i data-feather="trending-up" class="w-3 h-3 mr-1"></i>
+  Trending
+</span>
+</div>
+<div class="p-4">
+<span class="inline-block px-2 py-1 text-xs font-semibold rounded-full mb-2 {% if post.category == 'photography' %}bg-blue-100 text-blue-800{% elif post.category == 'travel' %}bg-purple-100 text-purple-800{% else %}bg-green-100 text-green-800{% endif %}">
+  {{ post.category.title() }}
+</span>
+<h3 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2">{{ post.title }}</h3>
+<p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ post.description }}</p>
+<div class="flex items-center justify-between text-sm text-gray-500">
+  <span class="flex items-center">
+    <i data-feather="eye" class="w-4 h-4 mr-1"></i>
+    {{ post.views }}
+  </span>
+  <span class="flex items-center">
+    <i data-feather="heart" class="w-4 h-4 mr-1"></i>
+    {{ post.likes }}
+  </span>
+  <span class="flex items-center">
+    <i data-feather="user" class="w-4 h-4 mr-1"></i>
+    {{ post.author.email.split('@')[0] }}
+  </span>
+</div>
+</div>
+</a>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12">
+<i data-feather="trending-up" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+<p class="text-gray-500">No trending posts yet. Be the first to create one!</p>
+</div>
+{% endif %}
+</div>
+</section>
+
+<!-- Most Popular Posts -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">
+  <i data-feather="star" class="inline-block w-8 h-8 text-yellow-500"></i>
+  Most Popular
+</h2>
+<p class="text-gray-600">All-time most liked posts</p>
+</div>
+</div>
+
+{% if popular_posts %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+{% for post in popular_posts %}
+<a href="{{ url_for('view_post', post_id=post.id) }}" class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1" data-aos="fade-up">
+<div class="relative">
+{% if post.content_type == 'image' %}
+  <img src="{{ url_for('uploaded_file', filename=post.file_path) }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+{% elif post.content_type == 'video' %}
+  <video src="{{ url_for('uploaded_file', filename=post.file_path) }}" class="w-full h-48 object-cover"></video>
+{% else %}
+  <div class="w-full h-48 bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+    <i data-feather="file-text" class="w-12 h-12 text-white"></i>
+  </div>
+{% endif %}
+<span class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
+  <i data-feather="star" class="w-3 h-3 mr-1"></i>
+  Popular
+</span>
+</div>
+<div class="p-4">
+<span class="inline-block px-2 py-1 text-xs font-semibold rounded-full mb-2 {% if post.category == 'photography' %}bg-blue-100 text-blue-800{% elif post.category == 'travel' %}bg-purple-100 text-purple-800{% else %}bg-green-100 text-green-800{% endif %}">
+  {{ post.category.title() }}
+</span>
+<h3 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2">{{ post.title }}</h3>
+<p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ post.description }}</p>
+<div class="flex items-center justify-between text-sm text-gray-500">
+  <span class="flex items-center">
+    <i data-feather="eye" class="w-4 h-4 mr-1"></i>
+    {{ post.views }}
+  </span>
+  <span class="flex items-center text-yellow-600 font-semibold">
+    <i data-feather="heart" class="w-4 h-4 mr-1"></i>
+    {{ post.likes }}
+  </span>
+  <span class="flex items-center">
+    <i data-feather="user" class="w-4 h-4 mr-1"></i>
+    {{ post.author.email.split('@')[0] }}
+  </span>
+</div>
+</div>
+</a>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12">
+<i data-feather="star" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+<p class="text-gray-500">No popular posts yet.</p>
+</div>
+{% endif %}
+</div>
+</section>
+
+<!-- Top Creators -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">
+  <i data-feather="award" class="inline-block w-8 h-8 text-purple-500"></i>
+  Top Creators
+</h2>
+<p class="text-gray-600">Most active content creators on DriftLens</p>
+</div>
+</div>
+
+{% if top_creators %}
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+{% for creator, post_count in top_creators %}
+<div class="bg-white rounded-lg p-6 shadow-md hover:shadow-xl transition duration-300 text-center" data-aos="fade-up">
+<div class="relative inline-block mb-4">
+{% if creator.profile_picture %}
+  <img src="{{ url_for('uploaded_file', filename=creator.profile_picture) }}" alt="{{ creator.display_name or creator.email.split('@')[0] }}" class="w-20 h-20 rounded-full object-cover mx-auto border-4 border-blue-500">
+{% else %}
+  <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto border-4 border-blue-500">
+    <span class="text-2xl font-bold text-white">{{ (creator.display_name or creator.email)[0].upper() }}</span>
+  </div>
+{% endif %}
+<span class="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+  <i data-feather="award" class="w-3 h-3"></i>
+</span>
+</div>
+<h3 class="text-lg font-bold text-gray-800 mb-1">{{ creator.display_name or creator.email.split('@')[0] }}</h3>
+<p class="text-sm text-gray-500 mb-3">{{ creator.email }}</p>
+<div class="bg-blue-50 rounded-lg p-3 mb-4">
+<p class="text-2xl font-bold text-blue-600">{{ post_count }}</p>
+<p class="text-xs text-gray-600">Posts Created</p>
+</div>
+<a href="{{ url_for('view_user_profile', user_id=creator.id) }}" class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 text-sm">
+View Profile
+</a>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12">
+<i data-feather="users" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+<p class="text-gray-500">No creators found.</p>
+</div>
+{% endif %}
+</div>
+</section>
+
+<!-- Categories -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">
+  <i data-feather="grid" class="inline-block w-8 h-8 text-green-500"></i>
+  Browse Categories
+</h2>
+<p class="text-gray-600">Explore content by category</p>
+</div>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+<!-- Photography -->
+<a href="{{ url_for('category_posts', category='photography') }}" class="category-photography rounded-lg overflow-hidden shadow-lg text-white hover:shadow-2xl transition duration-300 transform hover:-translate-y-2" data-aos="zoom-in">
+<div class="relative h-64 bg-cover bg-center" style="background-image: url('http://static.photos/photography/640x360/1');">
+<div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+<div class="absolute bottom-0 p-6 w-full">
+<h3 class="text-2xl font-bold title-font mb-2 flex items-center">
+  <i data-feather="camera" class="w-6 h-6 mr-2"></i>
+  Photography
+</h3>
+<p class="opacity-90 mb-2">Stunning visual stories</p>
+{% for category, count in category_stats %}
+  {% if category == 'photography' %}
+  <span class="inline-block px-3 py-1 bg-white text-blue-600 rounded-full text-sm font-semibold">
+    {{ count }} Posts
+  </span>
+  {% endif %}
+{% endfor %}
+</div>
+</div>
+</a>
+
+<!-- Travel -->
+<a href="{{ url_for('category_posts', category='travel') }}" class="category-travel rounded-lg overflow-hidden shadow-lg text-white hover:shadow-2xl transition duration-300 transform hover:-translate-y-2" data-aos="zoom-in" data-aos-delay="100">
+<div class="relative h-64 bg-cover bg-center" style="background-image: url('http://static.photos/travel/640x360/1');">
+<div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+<div class="absolute bottom-0 p-6 w-full">
+<h3 class="text-2xl font-bold title-font mb-2 flex items-center">
+  <i data-feather="map-pin" class="w-6 h-6 mr-2"></i>
+  Travel
+</h3>
+<p class="opacity-90 mb-2">Guides and experiences</p>
+{% for category, count in category_stats %}
+  {% if category == 'travel' %}
+  <span class="inline-block px-3 py-1 bg-white text-blue-600 rounded-full text-sm font-semibold">
+    {{ count }} Posts
+  </span>
+  {% endif %}
+{% endfor %}
+</div>
+</div>
+</a>
+
+<!-- Adventure -->
+<a href="{{ url_for('category_posts', category='adventure') }}" class="category-adventure rounded-lg overflow-hidden shadow-lg text-white hover:shadow-2xl transition duration-300 transform hover:-translate-y-2" data-aos="zoom-in" data-aos-delay="200">
+<div class="relative h-64 bg-cover bg-center" style="background-image: url('http://static.photos/adventure/640x360/1');">
+<div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+<div class="absolute bottom-0 p-6 w-full">
+<h3 class="text-2xl font-bold title-font mb-2 flex items-center">
+  <i data-feather="navigation" class="w-6 h-6 mr-2"></i>
+  Adventure
+</h3>
+<p class="opacity-90 mb-2">Thrilling experiences</p>
+{% for category, count in category_stats %}
+  {% if category == 'adventure' %}
+  <span class="inline-block px-3 py-1 bg-white text-green-600 rounded-full text-sm font-semibold">
+    {{ count }} Posts
+  </span>
+  {% endif %}
+{% endfor %}
+</div>
+</div>
+</a>
+</div>
+</div>
+</section>
+
+<!-- Active Groups -->
+<section class="py-16 bg-gray-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">
+  <i data-feather="users" class="inline-block w-8 h-8 text-orange-500"></i>
+  Active Groups
+</h2>
+<p class="text-gray-600">Join communities with similar interests</p>
+</div>
+<a href="{{ url_for('groups') }}" class="text-blue-600 hover:text-blue-700 font-medium flex items-center">
+View All
+<i data-feather="arrow-right" class="w-4 h-4 ml-1"></i>
+</a>
+</div>
+
+{% if active_groups %}
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+{% for group in active_groups %}
+<div class="bg-white rounded-lg p-6 shadow-md hover:shadow-xl transition duration-300" data-aos="fade-up">
+<div class="mb-4">
+<div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mx-auto mb-3">
+<i data-feather="users" class="w-8 h-8 text-white"></i>
+</div>
+<h3 class="text-lg font-bold text-gray-800 mb-2 text-center">{{ group.name }}</h3>
+<p class="text-sm text-gray-600 text-center mb-3 line-clamp-2">{{ group.description or 'No description' }}</p>
+</div>
+<div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+<span class="flex items-center">
+  <i data-feather="users" class="w-4 h-4 mr-1"></i>
+  {{ group.members.count() }} members
+</span>
+<span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+  {% if group.is_private %}Private{% else %}Public{% endif %}
+</span>
+</div>
+<a href="{{ url_for('group_detail', group_id=group.id) }}" class="block text-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition duration-300 text-sm">
+View Group
+</a>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12">
+<i data-feather="users" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+<p class="text-gray-500 mb-4">No active groups yet.</p>
+<a href="{{ url_for('create_group') }}" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">
+Create First Group
+</a>
+</div>
+{% endif %}
+</div>
+</section>
+
+<!-- Recent Posts -->
+<section class="py-16 bg-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-2">
+  <i data-feather="clock" class="inline-block w-8 h-8 text-indigo-500"></i>
+  Recent Posts
+</h2>
+<p class="text-gray-600">Latest content from the community</p>
+</div>
+<a href="{{ url_for('index') }}" class="text-blue-600 hover:text-blue-700 font-medium flex items-center">
+View All
+<i data-feather="arrow-right" class="w-4 h-4 ml-1"></i>
+</a>
+</div>
+
+{% if recent_posts %}
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+{% for post in recent_posts %}
+<a href="{{ url_for('view_post', post_id=post.id) }}" class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1" data-aos="fade-up">
+<div class="relative">
+{% if post.content_type == 'image' %}
+  <img src="{{ url_for('uploaded_file', filename=post.file_path) }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+{% elif post.content_type == 'video' %}
+  <video src="{{ url_for('uploaded_file', filename=post.file_path) }}" class="w-full h-48 object-cover"></video>
+{% else %}
+  <div class="w-full h-48 bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
+    <i data-feather="file-text" class="w-12 h-12 text-white"></i>
+  </div>
+{% endif %}
+<span class="absolute top-2 right-2 bg-indigo-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
+  <i data-feather="clock" class="w-3 h-3 mr-1"></i>
+  New
+</span>
+</div>
+<div class="p-4">
+<span class="inline-block px-2 py-1 text-xs font-semibold rounded-full mb-2 {% if post.category == 'photography' %}bg-blue-100 text-blue-800{% elif post.category == 'travel' %}bg-purple-100 text-purple-800{% else %}bg-green-100 text-green-800{% endif %}">
+  {{ post.category.title() }}
+</span>
+<h3 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2">{{ post.title }}</h3>
+<p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ post.description }}</p>
+<div class="flex items-center justify-between text-sm text-gray-500">
+  <span class="flex items-center">
+    <i data-feather="eye" class="w-4 h-4 mr-1"></i>
+    {{ post.views }}
+  </span>
+  <span class="flex items-center">
+    <i data-feather="heart" class="w-4 h-4 mr-1"></i>
+    {{ post.likes }}
+  </span>
+  <span class="text-xs">
+    {{ post.created_at|philippine_time('%b %d') if post.created_at else 'Recently' }}
+  </span>
+</div>
+</div>
+</a>
+{% endfor %}
+</div>
+{% else %}
+<div class="text-center py-12">
+<i data-feather="clock" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+<p class="text-gray-500">No recent posts.</p>
+</div>
+{% endif %}
+</div>
+</section>
+
+<!-- Footer CTA -->
+<section class="py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<h2 class="text-3xl md:text-4xl font-bold title-font mb-4" data-aos="fade-up">Ready to Share Your Story?</h2>
+<p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">Join our community of creators and share your photography, travel experiences, and adventures</p>
+<a href="{{ url_for('index') }}" class="inline-block px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition duration-300" data-aos="fade-up" data-aos-delay="200">
+<i data-feather="edit" class="inline-block w-5 h-5 mr-2"></i>
+Create Post
+</a>
+</div>
+</section>
+
+<script>
+  AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+  feather.replace();
+
+  // Load notification counts
+  function loadNotificationCounts() {
+    fetch('/get_notification_counts')
+      .then(response => response.json())
+      .then(data => {
+        const messageCount = document.getElementById('message-count');
+        const mobileMessageCount = document.getElementById('mobile-message-count');
+        if (data.messages > 0) {
+          messageCount.textContent = data.messages;
+          messageCount.classList.remove('hidden');
+          if (mobileMessageCount) {
+            mobileMessageCount.textContent = data.messages;
+            mobileMessageCount.classList.remove('hidden');
+          }
+        } else {
+          messageCount.classList.add('hidden');
+          if (mobileMessageCount) mobileMessageCount.classList.add('hidden');
+        }
+        
+        const notificationCount = document.getElementById('notification-count');
+        const mobileNotificationCount = document.getElementById('mobile-notification-count');
+        if (data.notifications > 0) {
+          notificationCount.textContent = data.notifications;
+          notificationCount.classList.remove('hidden');
+          if (mobileNotificationCount) {
+            mobileNotificationCount.textContent = data.notifications;
+            mobileNotificationCount.classList.remove('hidden');
+          }
+        } else {
+          notificationCount.classList.add('hidden');
+          if (mobileNotificationCount) mobileNotificationCount.classList.add('hidden');
+        }
+
+        const groupInvitationCount = document.getElementById('group-invitation-count');
+        const mobileGroupInvitationCount = document.getElementById('mobile-group-invitation-count');
+        if (data.group_invitations > 0) {
+          if (groupInvitationCount) {
+            groupInvitationCount.textContent = data.group_invitations;
+            groupInvitationCount.classList.remove('hidden');
+          }
+          if (mobileGroupInvitationCount) {
+            mobileGroupInvitationCount.textContent = data.group_invitations;
+            mobileGroupInvitationCount.classList.remove('hidden');
+          }
+        } else {
+          if (groupInvitationCount) groupInvitationCount.classList.add('hidden');
+          if (mobileGroupInvitationCount) mobileGroupInvitationCount.classList.add('hidden');
+        }
+      })
+      .catch(error => {
+        console.error('Error loading notification counts:', error);
+      });
+  }
+
+  // Mobile menu toggle
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    if (menu.classList.contains('hidden')) {
+      menu.classList.remove('hidden');
+      menu.classList.add('animate-slideDown');
+      menuIcon.classList.add('hidden');
+      closeIcon.classList.remove('hidden');
+    } else {
+      menu.classList.add('hidden');
+      menu.classList.remove('animate-slideDown');
+      menuIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    }
+    feather.replace();
+  }
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobile-menu');
+    const button = document.getElementById('mobile-menu-button');
+    if (!menu.contains(e.target) && !button.contains(e.target) && !menu.classList.contains('hidden')) {
+      toggleMobileMenu();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadNotificationCounts();
+    setInterval(loadNotificationCounts, 30000);
+  });
+</script>
+
+<!-- Splash Screen and Loading Screen -->
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+</body>
+</html>
+
