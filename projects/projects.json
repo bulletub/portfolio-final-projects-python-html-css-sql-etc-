@@ -13,7 +13,7 @@
       "description": "A comprehensive real-time weather analysis dashboard with interactive maps, live weather updates, advanced analytics, and data export capabilities. Features trend analysis, distribution charts, and automatic weather alerts.",
       "technologies": ["Python", "Flask", "Open-Meteo API", "Leaflet.js", "Matplotlib", "HTML5", "CSS3", "JavaScript"],
       "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
-      "liveUrl": "projects/weather-analyzer/index.html",
+      "liveUrl": "https://weather-analyzer-djrx.onrender.com/",
       "category": "Web Application"
     },
     {
