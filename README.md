@@ -1,16 +1,17 @@
 # My Portfolio
 
-A modern portfolio website showcasing three full-stack projects developed over 4 months. This portfolio demonstrates my skills in web development, mobile app development, and backend systems.
+A modern portfolio website showcasing four full-stack projects developed over 4 months. This portfolio demonstrates my skills in web development, mobile app development, backend systems, and PHP server-side programming.
 
 ## 🎯 About This Portfolio
 
-This portfolio contains three comprehensive projects that I developed over a 4-month period, showcasing my abilities in:
+This portfolio contains four comprehensive projects that I developed over a 4-month period, showcasing my abilities in:
 
 - **Frontend Development**: Angular, Ionic, HTML5, CSS3, JavaScript
-- **Backend Development**: Python, Flask, SQLAlchemy
+- **Backend Development**: Python, Flask, PHP, SQLAlchemy
 - **Mobile Development**: Angular/Ionic hybrid apps
-- **Database Management**: SQLite, PostgreSQL
+- **Database Management**: SQLite, PostgreSQL, MySQL
 - **API Integration**: RESTful APIs, third-party API integration
+- **Server-Side Programming**: PHP, Python, payment processing
 - **UI/UX Design**: Responsive design, modern interfaces
 
 ## 📦 Projects Included
@@ -30,9 +31,14 @@ A complete social blogging platform with user authentication, posts, comments, m
 
 **Technologies**: Python 3, Flask, SQLAlchemy, Flask-Login, Flask-Bcrypt, SQLite/PostgreSQL, HTML5, CSS3, JavaScript
 
+### 4. 🐾 Pet Pantry - E-Commerce Platform
+A comprehensive full-stack e-commerce platform for pet products with payment processing, order management, admin dashboard, reviews, support chat, and inventory management.
+
+**Technologies**: PHP, MySQL, HTML5, CSS3, JavaScript, jQuery, PHPMailer, Dompdf, PHP QR Code
+
 ## ⏱️ Development Timeline
 
-All three projects were developed over a **4-month period**, demonstrating:
+All four projects were developed over a **4-month period**, demonstrating:
 - Rapid learning and implementation
 - Full-stack development capabilities
 - Ability to work with multiple technology stacks simultaneously
@@ -74,15 +80,18 @@ All three projects were developed over a **4-month period**, demonstrating:
 
 ### Backend Technologies
 - **Python 3** - Backend programming language
-- **Flask** - Web framework
+- **PHP** - Server-side scripting language
+- **Flask** - Python web framework
 - **SQLAlchemy** - ORM for database management
 - **Flask-Login** - User session management
 - **Flask-Bcrypt** - Password hashing
+- **PDO** - PHP database abstraction
 - **RESTful APIs** - API design and integration
 
 ### Database
 - **SQLite** - Development database
 - **PostgreSQL** - Production database option
+- **MySQL** - Relational database management
 
 ### Tools & Services
 - **Capacitor** - Native mobile app capabilities
@@ -100,7 +109,8 @@ portfolio/
 │   ├── projects.json       # Project metadata
 │   ├── sandwich-spread/    # E-Commerce Mobile App
 │   ├── weather-analyzer/  # Weather Dashboard
-│   └── driftlens-blog/    # Social Blogging Platform
+│   ├── driftlens-blog/    # Social Blogging Platform
+│   └── pet-pantry/        # E-Commerce Platform (PHP)
 ├── .gitignore
 └── README.md
 ```
@@ -111,6 +121,7 @@ portfolio/
 - **Sandwich Spread**: Available in projects folder
 - **Weather Analyzer**: Deploy to Render/Railway (see deployment guide)
 - **DriftLens Blog**: Deploy to Render/Railway (see deployment guide)
+- **Pet Pantry**: Deploy to web hosting (see deployment guide)
 
 ## 📚 What I Built
 

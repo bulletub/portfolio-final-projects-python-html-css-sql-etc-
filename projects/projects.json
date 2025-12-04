@@ -23,6 +23,14 @@
       "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
       "liveUrl": "projects/driftlens-blog/index.html",
       "category": "Web Application"
+    },
+    {
+      "title": "Pet Pantry",
+      "description": "A comprehensive full-stack e-commerce platform for pet products with shopping cart, payment processing, order management, admin dashboard, reviews, support chat, inventory management, and PDF invoice generation.",
+      "technologies": ["PHP", "MySQL", "HTML5", "CSS3", "JavaScript", "jQuery", "PHPMailer", "Dompdf", "PHP QR Code"],
+      "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
+      "liveUrl": "projects/pet-pantry/index.html",
+      "category": "Web Application"
     }
   ]
 }
