@@ -21,7 +21,7 @@
       "description": "A full-featured social blogging platform with user authentication, post creation, comments, likes, messaging, groups, notifications, and admin dashboard. Includes guest browsing, search functionality, and mobile-responsive design.",
       "technologies": ["Python", "Flask", "SQLAlchemy", "SQLite", "Flask-Login", "Bcrypt", "HTML5", "CSS3", "JavaScript"],
       "githubUrl": "https://github.com/bulletub/portfolio-final-projects-python-html-css-sql-etc-",
-      "liveUrl": "projects/driftlens-blog/index.html",
+      "liveUrl": "https://lape.pythonanywhere.com/",
       "category": "Web Application"
     },
     {
