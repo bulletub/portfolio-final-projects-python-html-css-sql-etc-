@@ -39,7 +39,7 @@ async function renderProjects() {
         <div class="project-card">
             <h3>${project.title}</h3>
             <p>${project.description}</p>
-            ${project.technologies ? `<p><strong>Tech Stack:</strong> ${project.technologies.join(', ')}</p>` : ''}
+            ${project.technologies ? `<p class="tech-stack"><strong>Tech Stack:</strong> ${project.technologies.join(', ')}</p>` : ''}
             <div class="project-links">
                 ${project.githubUrl ? `<a href="${project.githubUrl}" target="_blank">GitHub</a>` : ''}
                 ${project.liveUrl ? `<a href="${project.liveUrl}" target="_blank">Live Demo</a>` : ''}
