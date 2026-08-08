@@ -217,6 +217,7 @@ export type Database = {
         Row: {
           account_type: string
           created_at: string
+          email: string | null
           id: string
           name: string | null
           preferred_payment_method: string | null
@@ -224,6 +225,7 @@ export type Database = {
         Insert: {
           account_type?: string
           created_at?: string
+          email?: string | null
           id: string
           name?: string | null
           preferred_payment_method?: string | null
@@ -231,6 +233,7 @@ export type Database = {
         Update: {
           account_type?: string
           created_at?: string
+          email?: string | null
           id?: string
           name?: string | null
           preferred_payment_method?: string | null
@@ -291,6 +294,7 @@ export type Database = {
         }
         Returns: number
       }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

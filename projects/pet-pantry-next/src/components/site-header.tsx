@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getSessionUser } from "@/lib/data/session";
+import { getSessionUser, getSessionProfile } from "@/lib/data/session";
 import { logout } from "@/lib/actions/auth";
 
 export default async function SiteHeader() {
   const user = await getSessionUser();
+  const profile = user ? await getSessionProfile() : null;
 
   return (
     <header className="site-header">
@@ -16,6 +17,7 @@ export default async function SiteHeader() {
         {user ? (
           <>
             <Link href="/orders">Orders</Link>
+            {profile?.account_type === "admin" && <Link href="/admin">Admin</Link>}
             <form action={logout}>
               <button type="submit">Log out</button>
             </form>
