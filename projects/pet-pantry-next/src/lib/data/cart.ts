@@ -11,3 +11,13 @@ export async function getCartItems() {
   if (error) throw error;
   return data;
 }
+
+export async function getCartCount() {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("cart")
+    .select("*", { count: "exact", head: true });
+
+  if (error) throw error;
+  return count ?? 0;
+}

@@ -572,6 +572,20 @@ export type Database = {
         Returns: number
       }
       is_admin: { Args: never; Returns: boolean }
+      list_active_promos: {
+        Args: never
+        Returns: {
+          code: string
+          description: string
+          discount_type: string
+          discount_value: number
+          end_date: string
+          id: number
+          max_discount: number
+          min_purchase: number
+          title: string
+        }[]
+      }
       preview_promo: {
         Args: { p_code: string; p_subtotal: number }
         Returns: {

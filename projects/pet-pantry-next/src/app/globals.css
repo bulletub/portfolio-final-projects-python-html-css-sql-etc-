@@ -1,3 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-orange: #fb7d1b;
+  --color-brand-orange-dark: #de6514;
+  --color-brand-gold: #fac76c;
+  --font-display: var(--font-anton), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
+}
+
 :root {
   --brand-orange: #fb7d1b;
   --brand-orange-dark: #de6514;
@@ -6,21 +16,26 @@
   --brand-bg: #f3f3f3;
 }
 
+/* Everything below is wrapped in @layer base so Tailwind utility classes
+   (which live in Tailwind's own `components`/`utilities` layers, declared
+   after `base`) correctly win in the cascade. Unlayered CSS always beats
+   layered CSS regardless of specificity -- without this, generic element
+   selectors like `button {}` below would clobber every Tailwind className
+   used throughout the restyled customer-facing pages. */
+@layer base {
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: "Inter", sans-serif;
-  color: var(--brand-text);
-  background-color: var(--brand-bg);
 }
 
 h1,
 h2,
 h3 {
-  font-family: "Anton", sans-serif;
+  font-family: var(--font-anton), sans-serif;
   letter-spacing: 0.02em;
 }
 
@@ -352,3 +367,5 @@ main {
 .notification-item.unread {
   font-weight: 700;
 }
+
+} /* end @layer base */

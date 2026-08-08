@@ -15,31 +15,32 @@ export default function CartItemRow({ item }: { item: CartItem }) {
   if (!item.product) return null;
 
   return (
-    <tr>
-      <td>{item.product.name}</td>
-      <td>₱{item.product.price.toFixed(2)}</td>
-      <td>
-        <input
-          type="number"
-          min={1}
-          max={item.product.stock}
-          defaultValue={item.quantity}
-          disabled={pending}
-          onBlur={(e) =>
-            startTransition(() => updateCartItemQuantity(item.id, Number(e.target.value)))
-          }
-        />
-      </td>
-      <td>₱{(item.quantity * item.product.price).toFixed(2)}</td>
-      <td>
-        <button
-          type="button"
-          disabled={pending}
-          onClick={() => startTransition(() => removeCartItem(item.id))}
-        >
-          Remove
-        </button>
-      </td>
-    </tr>
+    <div className="grid grid-cols-[50px_2fr_1fr_1fr_1fr_60px] items-center gap-2 border-b border-neutral-100 py-3 text-sm">
+      <img
+        src={item.product.image_path ?? "/products/placeholder.svg"}
+        alt={item.product.name}
+        className="h-14 w-14 rounded-lg object-cover"
+      />
+      <span className="font-medium text-neutral-800">{item.product.name}</span>
+      <span className="text-neutral-600">₱{item.product.price.toFixed(2)}</span>
+      <input
+        type="number"
+        min={1}
+        max={item.product.stock}
+        defaultValue={item.quantity}
+        disabled={pending}
+        onBlur={(e) => startTransition(() => updateCartItemQuantity(item.id, Number(e.target.value)))}
+        className="w-16 rounded-lg border border-neutral-200 px-2 py-1 text-center"
+      />
+      <span className="font-semibold text-neutral-800">₱{(item.quantity * item.product.price).toFixed(2)}</span>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => startTransition(() => removeCartItem(item.id))}
+        className="justify-self-end bg-transparent text-xs font-semibold text-orange-600 underline hover:text-orange-700"
+      >
+        Remove
+      </button>
+    </div>
   );
 }

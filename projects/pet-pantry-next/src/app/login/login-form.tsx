@@ -13,24 +13,57 @@ export default function LoginForm() {
 
   return (
     <div>
-      <form action={action}>
+      <form action={action} className="flex flex-col gap-4">
         <input type="hidden" name="next" value={next} />
         <div>
-          <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" required />
+          <label htmlFor="email" className="mb-1 block text-sm font-medium text-neutral-700">
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm focus:border-brand-orange focus:ring-2 focus:ring-orange-200 focus:outline-none"
+          />
         </div>
         <div>
-          <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" required />
+          <label htmlFor="password" className="mb-1 block text-sm font-medium text-neutral-700">
+            Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-sm focus:border-brand-orange focus:ring-2 focus:ring-orange-200 focus:outline-none"
+          />
         </div>
-        {state?.error && <p role="alert">{state.error}</p>}
-        {oauthFailed && <p role="alert">Google sign-in failed. Please try again.</p>}
-        <button type="submit" disabled={pending}>
+        {state?.error && (
+          <p className="rounded-lg border border-red-400 bg-red-100 px-4 py-3 text-sm text-red-700">
+            {state.error}
+          </p>
+        )}
+        {oauthFailed && (
+          <p className="rounded-lg border border-red-400 bg-red-100 px-4 py-3 text-sm text-red-700">
+            Google sign-in failed. Please try again.
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-full rounded-lg bg-yellow-500 py-3 font-medium text-black hover:bg-yellow-600 disabled:opacity-60"
+        >
           {pending ? "Logging in…" : "Log in"}
         </button>
       </form>
-      <form action={signInWithGoogle.bind(null, next)}>
-        <button type="submit">Continue with Google</button>
+      <form action={signInWithGoogle.bind(null, next)} className="mt-3">
+        <button
+          type="submit"
+          className="w-full rounded-lg border border-neutral-300 bg-white py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+        >
+          Continue with Google
+        </button>
       </form>
     </div>
   );

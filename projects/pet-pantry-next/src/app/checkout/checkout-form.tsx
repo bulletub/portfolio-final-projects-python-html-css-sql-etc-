@@ -31,54 +31,82 @@ export default function CheckoutForm({
   }
 
   return (
-    <form action={action}>
+    <form action={action} className="flex flex-col gap-6">
       <input type="hidden" name="cart_ids" value={cartIds.join(",")} />
 
-      <h2>Choose address</h2>
-      {addresses.map((address) => (
-        <label className="address-option" key={address.id}>
-          <input
-            type="radio"
-            name="address_id"
-            value={address.id}
-            defaultChecked={address.id === defaultAddress?.id}
-          />{" "}
-          {address.full_name} — {address.address}
-        </label>
-      ))}
-
-      <h2>Payment method</h2>
-      <label className="address-option">
-        <input type="radio" name="payment_method" value="bank_transfer" defaultChecked /> Bank
-        transfer (manually verified by admin)
-      </label>
-      <label className="address-option">
-        <input type="radio" name="payment_method" value="cod" /> Cash on delivery
-      </label>
-
-      <h2>Promo code</h2>
-      <div style={{ display: "flex", gap: "0.5rem", maxWidth: 400 }}>
-        <input
-          name="promo_code"
-          value={promoCode}
-          onChange={(e) => {
-            setPromoCode(e.target.value);
-            setPromoPreview(undefined);
-          }}
-          placeholder="Enter code"
-        />
-        <button type="button" disabled={previewPending} onClick={handleApplyPromo}>
-          {previewPending ? "Checking…" : "Apply"}
-        </button>
+      <div className="rounded-xl border border-neutral-100 bg-white p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-bold tracking-wide text-neutral-500 uppercase">Shipping Address</h2>
+        <div className="flex flex-col gap-2">
+          {addresses.map((address) => (
+            <label
+              key={address.id}
+              className="flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm has-checked:border-brand-orange has-checked:bg-orange-50"
+            >
+              <input
+                type="radio"
+                name="address_id"
+                value={address.id}
+                defaultChecked={address.id === defaultAddress?.id}
+              />
+              {address.full_name} — {address.address}
+            </label>
+          ))}
+        </div>
       </div>
-      {promoPreview && "error" in promoPreview && <p role="alert">{promoPreview.error}</p>}
-      {promoPreview && "discountAmount" in promoPreview && (
-        <p>Discount: −₱{promoPreview.discountAmount.toFixed(2)}</p>
-      )}
 
-      {state?.error && <p role="alert">{state.error}</p>}
+      <div className="rounded-xl border border-neutral-100 bg-white p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-bold tracking-wide text-neutral-500 uppercase">Payment Method</h2>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm has-checked:border-brand-orange has-checked:bg-orange-50">
+            <input type="radio" name="payment_method" value="bank_transfer" defaultChecked />
+            🏦 Bank transfer (manually verified by admin)
+          </label>
+          <label className="flex items-center gap-2 rounded-lg border border-neutral-200 px-3 py-2 text-sm has-checked:border-brand-orange has-checked:bg-orange-50">
+            <input type="radio" name="payment_method" value="cod" />
+            💵 Cash on delivery
+          </label>
+        </div>
+      </div>
 
-      <button type="submit" disabled={pending || addresses.length === 0}>
+      <div className="rounded-xl border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 p-5">
+        <h2 className="mb-3 text-sm font-bold text-neutral-800">🎁 Have a Promo Code?</h2>
+        <div className="flex gap-2">
+          <input
+            name="promo_code"
+            value={promoCode}
+            onChange={(e) => {
+              setPromoCode(e.target.value.toUpperCase());
+              setPromoPreview(undefined);
+            }}
+            placeholder="Enter code"
+            className="flex-1 rounded-lg border border-orange-300 bg-white px-3 py-2 text-sm uppercase"
+          />
+          <button
+            type="button"
+            disabled={previewPending}
+            onClick={handleApplyPromo}
+            className="rounded-lg bg-brand-orange px-4 py-2 text-sm font-semibold text-white hover:bg-brand-orange-dark disabled:opacity-60"
+          >
+            {previewPending ? "Checking…" : "Apply"}
+          </button>
+        </div>
+        {promoPreview && "error" in promoPreview && (
+          <p className="mt-2 text-sm text-red-600">{promoPreview.error}</p>
+        )}
+        {promoPreview && "discountAmount" in promoPreview && (
+          <p className="mt-2 text-sm font-semibold text-green-600">
+            Discount applied: −₱{promoPreview.discountAmount.toFixed(2)}
+          </p>
+        )}
+      </div>
+
+      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+
+      <button
+        type="submit"
+        disabled={pending || addresses.length === 0}
+        className="rounded-lg bg-brand-orange px-6 py-3 text-sm font-semibold text-white hover:bg-brand-orange-dark disabled:opacity-60"
+      >
         {pending ? "Placing order…" : "Place order"}
       </button>
     </form>

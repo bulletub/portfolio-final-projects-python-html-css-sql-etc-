@@ -27,3 +27,13 @@ export async function isInWishlist(productId: number) {
   if (error) throw error;
   return data !== null;
 }
+
+export async function getWishlistCount() {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("wishlist")
+    .select("*", { count: "exact", head: true });
+
+  if (error) throw error;
+  return count ?? 0;
+}
