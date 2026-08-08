@@ -13,11 +13,21 @@ export async function updateOrderStatus(orderGroupId: number, status: string) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("order_groups")
     .update({ status })
-    .eq("id", orderGroupId);
+    .eq("id", orderGroupId)
+    .select("user_id")
+    .single();
   if (error) throw error;
+
+  await supabase.from("notifications").insert({
+    audience: "customer",
+    user_id: data.user_id,
+    type: "order_status",
+    message: `Your order #${orderGroupId} is now ${status}.`,
+    order_group_id: orderGroupId,
+  });
 
   revalidatePath("/admin/orders");
 }
