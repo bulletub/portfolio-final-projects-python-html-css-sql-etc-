@@ -18,7 +18,10 @@ export default async function AdminOrdersPage() {
   return (
     <div>
       {orderGroups.map((group) => (
-        <OrderRow key={group.id} group={group} />
+        <OrderRow
+          key={group.id}
+          group={{ ...group, createdAtDisplay: new Date(group.created_at).toLocaleString() }}
+        />
       ))}
     </div>
   );

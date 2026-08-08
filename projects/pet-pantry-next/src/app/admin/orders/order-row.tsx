@@ -9,7 +9,7 @@ type OrderGroup = {
   address: string;
   payment_method: string;
   payment_code: string | null;
-  created_at: string;
+  createdAtDisplay: string;
   customer: { name: string | null; email: string | null } | null;
   orders: { id: number; quantity: number; price: number; product: { name: string } | null }[];
 };
@@ -23,7 +23,7 @@ export default function OrderRow({ group }: { group: OrderGroup }) {
       <p>
         Order #{group.id} — <span className="status-badge">{group.status}</span>
       </p>
-      <p>{new Date(group.created_at).toLocaleString()}</p>
+      <p>{group.createdAtDisplay}</p>
       <p>
         Customer: {group.customer?.name ?? "—"} ({group.customer?.email ?? "—"})
       </p>
