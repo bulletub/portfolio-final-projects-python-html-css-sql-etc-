@@ -35,6 +35,11 @@ export default async function OrdersPage() {
             </ul>
             <p>Shipping to: {group.address}</p>
             <p>Payment: {group.payment_method}</p>
+            {group.promo_code && (
+              <p>
+                Promo: {group.promo_code} (−₱{group.discount_amount.toFixed(2)})
+              </p>
+            )}
             <p>
               <strong>Total: ₱{total.toFixed(2)}</strong>
             </p>

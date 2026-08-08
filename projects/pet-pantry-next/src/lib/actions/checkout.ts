@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/data/session";
 
 export type CheckoutFormState = { error: string } | undefined;
+export type PromoPreviewState =
+  | { error: string }
+  | { discountType: string; discountValue: number; discountAmount: number }
+  | undefined;
 
 async function requireUser() {
   const user = await getSessionUser();
@@ -31,6 +35,23 @@ export async function addAddress(formData: FormData) {
   revalidatePath("/checkout");
 }
 
+export async function previewPromo(code: string, subtotal: number): Promise<PromoPreviewState> {
+  await requireUser();
+  if (!code.trim()) return undefined;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .rpc("preview_promo", { p_code: code.trim(), p_subtotal: subtotal })
+    .single();
+
+  if (error) return { error: error.message };
+  return {
+    discountType: data.discount_type,
+    discountValue: data.discount_value,
+    discountAmount: data.discount_amount,
+  };
+}
+
 export async function placeOrder(
   _prevState: CheckoutFormState,
   formData: FormData
@@ -41,6 +62,7 @@ export async function placeOrder(
   const addressId = formData.get("address_id");
   const cartIdsRaw = String(formData.get("cart_ids") ?? "");
   const paymentMethod = String(formData.get("payment_method") ?? "");
+  const promoCode = String(formData.get("promo_code") ?? "").trim();
 
   const cartIds = cartIdsRaw
     .split(",")
@@ -69,6 +91,7 @@ export async function placeOrder(
     p_address: `${addressRow.full_name}, ${addressRow.address}`,
     p_payment_method: paymentMethod,
     p_payment_code: paymentMethod === "bank_transfer" ? "pending_verification" : undefined,
+    p_promo_code: promoCode || undefined,
   });
 
   if (error) {

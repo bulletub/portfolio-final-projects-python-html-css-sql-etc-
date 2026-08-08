@@ -21,6 +21,7 @@ export default async function SiteHeader() {
         {user ? (
           <>
             <Link href="/orders">Orders</Link>
+            <Link href="/wishlist">Wishlist</Link>
             {isAdmin && <Link href="/admin">Admin</Link>}
             <NotificationBell
               initial={notifications}

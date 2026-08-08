@@ -1,19 +1,34 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { useActionState } from "react";
-import { placeOrder } from "@/lib/actions/checkout";
+import { placeOrder, previewPromo, type PromoPreviewState } from "@/lib/actions/checkout";
 
 type Address = { id: number; full_name: string; address: string; is_default: boolean };
 
 export default function CheckoutForm({
   addresses,
   cartIds,
+  subtotal,
 }: {
   addresses: Address[];
   cartIds: number[];
+  subtotal: number;
 }) {
   const [state, action, pending] = useActionState(placeOrder, undefined);
   const defaultAddress = addresses.find((a) => a.is_default) ?? addresses[0];
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoPreview, setPromoPreview] = useState<PromoPreviewState>(undefined);
+  const [previewPending, startPreviewTransition] = useTransition();
+
+  function handleApplyPromo() {
+    if (!promoCode.trim()) return;
+    startPreviewTransition(async () => {
+      const result = await previewPromo(promoCode, subtotal);
+      setPromoPreview(result);
+    });
+  }
 
   return (
     <form action={action}>
@@ -40,6 +55,26 @@ export default function CheckoutForm({
       <label className="address-option">
         <input type="radio" name="payment_method" value="cod" /> Cash on delivery
       </label>
+
+      <h2>Promo code</h2>
+      <div style={{ display: "flex", gap: "0.5rem", maxWidth: 400 }}>
+        <input
+          name="promo_code"
+          value={promoCode}
+          onChange={(e) => {
+            setPromoCode(e.target.value);
+            setPromoPreview(undefined);
+          }}
+          placeholder="Enter code"
+        />
+        <button type="button" disabled={previewPending} onClick={handleApplyPromo}>
+          {previewPending ? "Checking…" : "Apply"}
+        </button>
+      </div>
+      {promoPreview && "error" in promoPreview && <p role="alert">{promoPreview.error}</p>}
+      {promoPreview && "discountAmount" in promoPreview && (
+        <p>Discount: −₱{promoPreview.discountAmount.toFixed(2)}</p>
+      )}
 
       {state?.error && <p role="alert">{state.error}</p>}
 

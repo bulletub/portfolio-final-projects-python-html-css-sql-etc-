@@ -9,6 +9,9 @@ type OrderGroup = {
   address: string;
   payment_method: string;
   payment_code: string | null;
+  promo_code: string | null;
+  discount_amount: number;
+  shipping_fee: number;
   createdAtDisplay: string;
   customer: { name: string | null; email: string | null } | null;
   orders: { id: number; quantity: number; price: number; product: { name: string } | null }[];
@@ -16,7 +19,10 @@ type OrderGroup = {
 
 export default function OrderRow({ group }: { group: OrderGroup }) {
   const [pending, startTransition] = useTransition();
-  const total = group.orders.reduce((sum, o) => sum + o.quantity * o.price, 0);
+  const total =
+    group.orders.reduce((sum, o) => sum + o.quantity * o.price, 0) +
+    group.shipping_fee -
+    group.discount_amount;
 
   return (
     <div className="order-card">
@@ -39,6 +45,11 @@ export default function OrderRow({ group }: { group: OrderGroup }) {
         Payment: {group.payment_method}
         {group.payment_code ? ` (${group.payment_code})` : ""}
       </p>
+      {group.promo_code && (
+        <p>
+          Promo: {group.promo_code} (−₱{group.discount_amount.toFixed(2)})
+        </p>
+      )}
       <p>
         <strong>Total: ₱{total.toFixed(2)}</strong>
       </p>

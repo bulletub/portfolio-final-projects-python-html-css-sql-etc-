@@ -232,6 +232,64 @@ export type Database = {
           },
         ]
       }
+      product_reviews: {
+        Row: {
+          created_at: string
+          id: number
+          image_path: string | null
+          order_group_id: number
+          product_id: number
+          rating: number
+          review_text: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          image_path?: string | null
+          order_group_id: number
+          product_id: number
+          rating: number
+          review_text?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          image_path?: string | null
+          order_group_id?: number
+          product_id?: number
+          rating?: number
+          review_text?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_order_group_id_fkey"
+            columns: ["order_group_id"]
+            isOneToOne: false
+            referencedRelation: "order_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category: string
@@ -295,6 +353,57 @@ export type Database = {
           id?: string
           name?: string | null
           preferred_payment_method?: string | null
+        }
+        Relationships: []
+      }
+      promos: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          end_date: string | null
+          id: number
+          max_discount: number | null
+          min_purchase: number
+          start_date: string | null
+          title: string
+          usage_count: number
+          usage_limit: number | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          end_date?: string | null
+          id?: never
+          max_discount?: number | null
+          min_purchase?: number
+          start_date?: string | null
+          title: string
+          usage_count?: number
+          usage_limit?: number | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          end_date?: string | null
+          id?: never
+          max_discount?: number | null
+          min_purchase?: number
+          start_date?: string | null
+          title?: string
+          usage_count?: number
+          usage_limit?: number | null
         }
         Relationships: []
       }
@@ -407,6 +516,42 @@ export type Database = {
           },
         ]
       }
+      wishlist: {
+        Row: {
+          created_at: string
+          id: number
+          product_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          product_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          product_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -427,6 +572,14 @@ export type Database = {
         Returns: number
       }
       is_admin: { Args: never; Returns: boolean }
+      preview_promo: {
+        Args: { p_code: string; p_subtotal: number }
+        Returns: {
+          discount_amount: number
+          discount_type: string
+          discount_value: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

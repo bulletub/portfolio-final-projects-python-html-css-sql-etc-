@@ -52,7 +52,7 @@ export default async function CheckoutPage() {
         <button type="submit">Save address</button>
       </form>
 
-      <CheckoutForm addresses={addresses} cartIds={cartIds} />
+      <CheckoutForm addresses={addresses} cartIds={cartIds} subtotal={total} />
     </main>
   );
 }
